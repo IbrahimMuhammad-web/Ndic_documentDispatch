@@ -10,7 +10,8 @@
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="{% static 'mail/styles.css' %}">
-        <link rel="shortcut icon" href="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" >
+        {% block additionalStyles %}{% endblock  %}
+        <link rel="shortcut icon" href="{% static '/mail/img/DocumentDisptach whiteBG.png' %}" >
     </head>
     <body>
       {% if user.is_authenticated %}
@@ -19,7 +20,7 @@
           <button type="button" id="sidebarCollapse" class="btn btn-link text-secondary mr-2 rounded-circle">
             <i class="fas fa-bars"></i>
         </button>
-            <a class="navbar-brand ml-2" href="#"><img class="gb_ua" src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png" srcset="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png 1x, https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_2x_r2.png 2x " alt="" aria-hidden="true" style="width:109px;height:40px"></a>
+            <a class="navbar-brand ml-2" href="#"><img class="gb_ua" src="{% static '/mail/img/dispatch_logo2.PNG' %}" alt="" aria-hidden="true" style="width:109px;height:40px"></a>
             <!-- search bar -->
             <form class="inline-form col-md-9 p-0 srch-form">
               <div class="input-group srchbar py-1">
@@ -56,10 +57,10 @@
           
               <div id="sidebar">
                   <ul class="nav nav-sidebar">
-                    <img class="sidebar-logo" src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png" srcset="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png 1x, https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_2x_r2.png 2x " alt="" aria-hidden="true" style="width:130px;height:40px">
+                    <img class="sidebar-logo" src="{% static '/mail/img/dispatch_logo2.PNG' %}" alt="" aria-hidden="true" style="width:130px;height:40px">
                     <li class="nav-item">
                       <a class="nav-link mb-3 mr-4 py-2 " id="compose" >
-                        <img src="https://www.gstatic.com/images/icons/material/colored_icons/2x/create_32dp.png" class="plus-img mr-2"> Compose
+                        <img src="{% static '/mail/img/pencil-fill.svg' %}" class="plus-img mr-2"> Compose
                       </a>
                     </li>
                     <li class="nav-item">

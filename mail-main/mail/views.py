@@ -47,7 +47,7 @@ def compose(request):
             recipients.append(user)
         except User.DoesNotExist:
             return JsonResponse({
-                "error": f"User with email {email} does not exist."
+                "error": f"User with email {email} does not exist."  #change to department {email} does not exist
             }, status=400)
 
     # Get contents of email
@@ -73,7 +73,7 @@ def compose(request):
 
     return JsonResponse({"message": "Email sent successfully."}, status=201)
 
-
+# this function is where that things in the page(mails) are filtered and displayed
 @login_required
 def mailbox(request, mailbox):
 

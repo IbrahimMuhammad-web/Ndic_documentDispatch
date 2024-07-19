@@ -1,0 +1,85 @@
+*{
+    text-align: left;
+}
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #ffff;
+}
+
+
+.login-container{
+    width: 300px;
+}
+
+.logo{
+    text-align: center;
+}
+
+.logo img {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #fff;
+    color: #3107c9;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: 1px solid #f0f0f0;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+}
+
+button:hover {
+    background: #1f2194;
+    color: white;
+}
+
+.forgot-password {
+    margin-bottom: 12px;
+    margin-top: 12px;
+}
+
+.forgot-password a {
+    text-decoration: none;
+    color: #2B2D81;
+}
+
+#first{
+    color: #2B2D81;
+    margin-bottom: 0px;
+}
+
+#second{
+    color: #2B2D81;
+    margin-top: 0px;
+    margin-bottom: 15px;
+}
+
+#continue{
+    text-align: center;
+    box-shadow: 2px 2px 5px #e6e6e6;
+}
+
+#fpword:hover{
+    color: #0307f6;
+}
+/* Responsive adjustments can be placed here as required */
+

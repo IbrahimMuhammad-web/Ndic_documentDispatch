@@ -4,25 +4,38 @@ const user_email = JSON.parse(
 const user_firstn = JSON.parse(
   document.getElementById("first_name").textContent
 );
-const user_lastn = JSON.parse(document.getElementById("last_name").textContent);
+const user_lastn = JSON.parse(
+  document.getElementById("last_name").textContent
+);
+
+// Ensure DOM is fully loaded before executing SPA logic
 document.addEventListener("DOMContentLoaded", function () {
+  // Set initial application state (inbox) and update history
   history.replaceState({ mailbox: "inbox" }, "Default state", "#inbox"); //default state
+  // Efficiently listen for popstate events (back/forward button)
   window.addEventListener("popstate", (e) => {
+    
+    // Optional debugging - uncomment to log history state during navigation
     // console.log(e.state);
+
+    // Handle search query navigation
     if(e.state.query){
       load_mailbox("search" ,e.state.query);
     }
     else if(e.state.email) {
+      // Parse email content from history state
       let doc = new DOMParser().parseFromString(e.state.element, 'text/html');
       veiw_email(e.state.email,doc, e.state.mail);
     }
     else if(e.state.mailbox !== null) {
+      // Navigate to mailbox based on history state
       if (e.state.mailbox !== "compose") {
         load_mailbox(e.state.mailbox);
       } else {
         compose_email();
       }
     }
+
     // if(e.state.){
     //   load_mailbox(e.state.mailbox);
     // }
@@ -46,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   window.addEventListener('resize', function(event){
+    // Check if window width is greater than 768px (larger screens)
     if ($(window).width() > 768) {
       if($(".main").hasClass("spread")){
         $("#sidebar").addClass("side_active");
@@ -63,6 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // navigation link clicks, updating the application state and history to ensure a smooth user experience.
   // Active Nav-links style
   $(".nav-link").each(function () {
     var link = this;
@@ -115,11 +130,13 @@ document.addEventListener("DOMContentLoaded", function () {
   load_mailbox("inbox");
 });
 
+// Function to handle composing a new email, replying to an existing email, or forwarding an email
 function compose_email(email = null, status="") {
   tog_menu(); // toggle sidebar when on mobile devices
   if($(window).width() <= 768){
     document.querySelector('.navbar').style.display = "flex";
   }
+  // Initialize the rich text editor for composing the email body
   if (document.querySelector("#compose-view").style.display === "none") {
     // create new instance of balloonEditor
     BalloonEditor.create(document.querySelector("#compose-body"))
@@ -222,10 +239,12 @@ function load_mailbox(mailbox, query = "") {
   tog_menu();
 
   if(mailbox !== "search"){
+    // Remove "active" class from all navigation links
     $(".nav-link").each(function () {
       // console.log(this.id);
       $(this).removeClass("active");
     });
+    // Add "active" class to the current mailbox navigation link
     $(`#${mailbox}`).addClass("active");
   }
   
@@ -246,6 +265,7 @@ function load_mailbox(mailbox, query = "") {
     </div>
   </div>`;
 
+  // Display the mailbox name with the first letter capitalized
   document.querySelector(
     "#emails-view"
   ).innerHTML = `<h4 class="mailbox_head py-2 pl-3 m-0 mx-1">${
@@ -253,9 +273,11 @@ function load_mailbox(mailbox, query = "") {
   }</h4> ${spinner}`;
 
   // console.log(mailbox);
+  // check If it's the search mailbox, update the URL endpoint if true
   if (mailbox === "search") {
     mailbox = `search/${query}`;
   }
+  // Fetch emails from the server based on the mailbox type
   fetch(`/emails/${mailbox}`)
     .then((response) => response.json())
     .then((emails) => {
@@ -306,6 +328,7 @@ function load_mailbox(mailbox, query = "") {
           let del_stat = email.deleted ? "Restore" : "Delete"
 
           let mark_read_stat = "Mark as Unread";
+          // Add a class to indicate unread email and update button text
           if (!email.read) {
             mark_read_stat = "Mark as Read";
             element.classList.add("unread");
@@ -322,6 +345,7 @@ function load_mailbox(mailbox, query = "") {
           let del_class = email.deleted ? "fa-recycle" : "fa-trash";
           let del_forever = mailbox === "trash" ?`<li class="btn-item del_forever" data-toggle="tooltip" data-placement="bottom" title="Delete forever"><i class="fas fa-trash"></i></li>   ` :"";
           let ext_btn = mailbox === "trash" ? "ext_btn": "";
+          // mail design layout html code
           return `
             ${user_avatar}
             <div class="star-wrapper"  data-toggle="tooltip" data-placement="bottom" title="${star_stat}">
@@ -580,6 +604,7 @@ function mark_del(email, element, mailbox) {
     });
 }
 
+// add email viewing to the html page
 function veiw_email(email_id, element, mailbox) {
 
   document.querySelector('.navbar').style.display = $(window).width() <= 768 ? "none" :"flex";

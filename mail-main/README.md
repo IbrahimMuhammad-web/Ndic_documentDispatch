@@ -1,14 +1,3 @@
-<div align="center">
-
-
-
-# Gmail Clone
-
-  [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://www.youtube.com/embed/ZYKOReUFKtE)  [![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)](https://gmail-b32w.onrender.com)
-
-
-
-</div>
 
 
 [![Multi-device](/images/multi-device.png)](https://www.youtube.com/embed/ZYKOReUFKtE)
@@ -187,12 +176,6 @@ I am using this section to outline areas that I want to continue focusing on in 
 ### Useful resources
 - [Q object docs](https://docs.djangoproject.com/en/4.0/topics/db/queries/#complex-lookups-with-q-objects) - This is the django doc i reffered for understanding Q objects.
 - [History Api](https://medium.com/@george.norberg/history-api-getting-started-36bfc82ddefc) - This is an amazing article which helped me finally understand History Api. I'd recommend it to anyone still learning this concept.
-
-
-## Author
-
-- Profile - [Hussain Shaikh](https://www.linkedin.com/in/hussainshk/)
-- Twitter - [@HussainSk2001](https://twitter.com/HussainSk2001)
 
 
 ## Acknowledgments
