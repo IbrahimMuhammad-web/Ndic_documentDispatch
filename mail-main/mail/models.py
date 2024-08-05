@@ -11,12 +11,12 @@ class User(AbstractUser):
     department = models.ForeignKey("DepartmentZoneUnit", on_delete=models.CASCADE, default="ITD") # add default department for users after adding departments to the database
     # this is returning an id for user's department instead of the department name, find a way to override it to return department name instead of department id
     def __str__(self):
-        return f"{self.department}"
+        return f"{self.email}"
 
 class Email(models.Model):
     department = models.ForeignKey("DepartmentZoneUnit", on_delete=models.SET_NULL, null=True, related_name="emails")
-    sender = models.ForeignKey("User", on_delete=models.CASCADE, null=True, related_name="emails_sent")
-    recipients = models.ManyToManyField("User", related_name="emails_received")
+    sender = models.ForeignKey("DepartmentZoneUnit", on_delete=models.CASCADE, null=True, related_name="emails_sent")
+    recipients = models.ManyToManyField("DepartmentZoneUnit", related_name="emails_received")
     subject = models.CharField(max_length=255)
     body = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -31,9 +31,9 @@ class Email(models.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "username": self.sender.first_name +" "+self.sender.last_name,
-            "sender": self.sender.department.department,
-            "recipients": [user.department.department for user in self.recipients.all()],
+            "username": self.sender.department,
+            "sender": self.sender.department,
+            "recipients": [recipients.department for recipients in self.recipients.all()],
             "subject": self.subject,
             "body": self.body,
             "timestamp": self.timestamp.strftime("%b %d-%Y-%H:%M %p" ),

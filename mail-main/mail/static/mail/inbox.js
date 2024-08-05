@@ -313,11 +313,11 @@ function load_mailbox(mailbox, query = "") {
           let sendto = email.recipients;
           if (sendto.includes(sender)) {
             let index = sendto.indexOf(email.username);
-            sendto[index] = "me";
-            sender = "me";
+            sendto[index] = email.sender;
+            sender = email.sender;
           }
           if(user_email === email.sender){
-            sender = "me";
+            sender = email.sender;
           }
           if (mailbox === "sent") {
             sender = `To: ${sendto}`;
@@ -641,7 +641,7 @@ function veiw_email(department_id, element, mailbox) {
   let subject =  email.subject.length > 0 ? email.subject : "(no subject)"
   if (sendto.includes(sender)) {
     let index = sendto.indexOf(email.username);
-    sendto[index] = "me";
+    sendto[index] = email.sender;
   }
   // console.log(email.recipients)
   let btn_list = element.querySelector(".btn-list").innerHTML 
@@ -675,7 +675,7 @@ function veiw_email(department_id, element, mailbox) {
                   <tbody>
                     <tr class="py-0">
                       <td class="text-muted text-right">From:</td>
-                      <td><span class="font-weight-bold">${email.sender}</span>}</td>
+                      <td><span class="font-weight-bold">${email.sender}</span></td>
                     </tr>
                     <tr>
                       <td class="text-muted text-right">To:</td>

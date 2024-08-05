@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from functools import reduce
 import operator
-from .models import User, Email
+from .models import User, Email, DepartmentZoneUnit
 
 
 def index(request):
@@ -33,7 +33,7 @@ def compose(request):
 
     # Check recipient emails
     data = json.loads(request.body)
-    departments = [department.strip() for department in data.get("recipients").split(",")]
+    departments = [department.strip().upper() for department in data.get("recipients").split(",")]
     if departments == [""]:
         return JsonResponse({
             "error": "At least one recipient required."
@@ -43,9 +43,9 @@ def compose(request):
     recipients = []
     for department in departments:
         try:
-            user = User.objects.get(department=department)
-            recipients.append(user)
-        except User.DoesNotExist:
+            department = DepartmentZoneUnit.objects.get(department=department)
+            recipients.append(department)
+        except DepartmentZoneUnit.DoesNotExist:
             return JsonResponse({
                 "error": f"Department {department} does not exist."  #change to department {email} does not exist
             }, status=400)
@@ -79,7 +79,7 @@ def compose(request):
 def mailbox(request, mailbox):
 
     # Filter emails returned based on mailbox
-    user_department = request.user.department
+    user_department = request.user.department.department
     if mailbox == "inbox":
         emails = Email.objects.filter(
             department=user_department, recipients=user_department, archived=False, deleted=False,
@@ -91,15 +91,15 @@ def mailbox(request, mailbox):
     elif mailbox == "archive":
         emails = Email.objects.filter(
             department=user_department, archived=True, deleted=False,
-        ).filter( Q(sender=request.user) |Q(recipients=request.user))
+        ).filter( Q(sender=user_department) |Q(recipients=user_department))
     elif mailbox == "starred":
         emails = Email.objects.filter(
             department=user_department, starred=True, deleted=False,
-        ).filter( Q(sender=request.user) |Q(recipients=request.user))
+        ).filter( Q(sender=user_department) |Q(recipients=user_department))
     elif mailbox == "trash":
         emails = Email.objects.filter(
             department=user_department, deleted=True
-        ).filter( Q(sender=request.user) |Q(recipients=request.user))
+        ).filter( Q(sender=user_department) |Q(recipients=user_department))
     
     else:
         return JsonResponse({"error": "Invalid mailbox."}, status=400)
@@ -115,7 +115,7 @@ def email(request, department_id):
 
     # Query for requested email
     try:
-        email = Email.objects.get(user=request.user, pk=department_id)
+        email = Email.objects.get(department=request.user.department, pk=department_id)
     except Email.DoesNotExist:
         return JsonResponse({"error": "Email not found."}, status=404)
 
@@ -151,13 +151,11 @@ def email(request, department_id):
 def search(request, query):
     if " " in query:
         queries = query.split(" ")
-        qset1 =  reduce(operator.__or__, [Q(sender__email__icontains=query) | Q(sender__first_name__icontains=query) | Q(sender__last_name__icontains=query)  | Q(subject__icontains=query) | Q(body__icontains=query) for query in queries])
-        results = Email.objects.filter(user=request.user).filter(qset1).distinct()
+        qset1 =  reduce(operator.__or__, [Q(sender__department__icontains=query) | Q(subject__icontains=query) | Q(body__icontains=query) for query in queries])
+        results = Email.objects.filter(department=request.user.department).filter(qset1).distinct()
     else:
-        results = Email.objects.filter(user=request.user)\
-            .filter(Q(sender__email__icontains=query) 
-            | Q(sender__first_name__icontains=query) 
-            | Q(sender__last_name__icontains=query) 
+        results = Email.objects.filter(department=request.user.department)\
+            .filter(Q(sender__department__icontains=query) 
             | Q(subject__icontains=query) 
             | Q(body__icontains=query)).distinct()
     if results:
