@@ -80,10 +80,21 @@ WSGI_APPLICATION = 'project3.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Document_Dispatch_DB2',
+        'USER': 'Dispatch_admin',
+        'PASSWORD': 'Hamma6842',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 
 AUTH_USER_MODEL = 'mail.User'
 

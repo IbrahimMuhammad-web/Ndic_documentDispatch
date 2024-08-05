@@ -33,21 +33,21 @@ def compose(request):
 
     # Check recipient emails
     data = json.loads(request.body)
-    emails = [email.strip() for email in data.get("recipients").split(",")]
-    if emails == [""]:
+    departments = [department.strip() for department in data.get("recipients").split(",")]
+    if departments == [""]:
         return JsonResponse({
             "error": "At least one recipient required."
         }, status=400)
 
     # Convert email addresses to users
     recipients = []
-    for email in emails:
+    for department in departments:
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(department=department)
             recipients.append(user)
         except User.DoesNotExist:
             return JsonResponse({
-                "error": f"User with email {email} does not exist."  #change to department {email} does not exist
+                "error": f"Department {department} does not exist."  #change to department {email} does not exist
             }, status=400)
 
     # Get contents of email
@@ -56,12 +56,12 @@ def compose(request):
 
     # Create one email for each recipient, plus sender
     users = set()
-    users.add(request.user)
+    users.add(request.user.department)
     users.update(recipients)
     for user in users:
         email = Email(
-            user=user,
-            sender=request.user,
+            department=user,
+            sender=request.user.department,
             subject=subject,
             body=body,
             read=user == request.user
@@ -74,29 +74,31 @@ def compose(request):
     return JsonResponse({"message": "Email sent successfully."}, status=201)
 
 # this function is where that things in the page(mails) are filtered and displayed
+# query all mails based on the user's departments
 @login_required
 def mailbox(request, mailbox):
 
     # Filter emails returned based on mailbox
+    user_department = request.user.department
     if mailbox == "inbox":
         emails = Email.objects.filter(
-            user=request.user, recipients=request.user, archived=False, deleted=False,
+            department=user_department, recipients=user_department, archived=False, deleted=False,
         )
     elif mailbox == "sent":
         emails = Email.objects.filter(
-            user=request.user, sender=request.user, deleted=False,
+            department=user_department, sender=user_department, deleted=False,
         )
     elif mailbox == "archive":
         emails = Email.objects.filter(
-            user=request.user, archived=True, deleted=False,
+            department=user_department, archived=True, deleted=False,
         ).filter( Q(sender=request.user) |Q(recipients=request.user))
     elif mailbox == "starred":
         emails = Email.objects.filter(
-            user=request.user, starred=True, deleted=False,
+            department=user_department, starred=True, deleted=False,
         ).filter( Q(sender=request.user) |Q(recipients=request.user))
     elif mailbox == "trash":
         emails = Email.objects.filter(
-            user=request.user, deleted=True
+            department=user_department, deleted=True
         ).filter( Q(sender=request.user) |Q(recipients=request.user))
     
     else:
@@ -109,11 +111,11 @@ def mailbox(request, mailbox):
 
 @csrf_exempt
 @login_required
-def email(request, email_id):
+def email(request, department_id):
 
     # Query for requested email
     try:
-        email = Email.objects.get(user=request.user, pk=email_id)
+        email = Email.objects.get(user=request.user, pk=department_id)
     except Email.DoesNotExist:
         return JsonResponse({"error": "Email not found."}, status=404)
 
@@ -175,7 +177,7 @@ def login_view(request):
         password = request.POST["password"]
         user = authenticate(request, username=email, password=password)
 
-        # Check if authentication successful
+        # Check if authentication was successful
         if user is not None:
             login(request, user)
             return HttpResponseRedirect(reverse("index"))

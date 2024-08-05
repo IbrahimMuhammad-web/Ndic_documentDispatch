@@ -151,7 +151,7 @@ function compose_email(email = null, status="") {
         else if (email !== null && status === "forward") {
           editor.setData(
             `<p>---------- Forwarded message ---------</p>
-            <p>From: <strong>${email.username}</strong> <span class="detail-small d-none d-lg-inline"><span><</span>${email.sender}></span> </p>
+            <p>From: <strong>${email.sender}</strong> </p>
             <p>Date: ${email.timestamp}</p>
             <p>Subject: ${email.subject}</p> 
             <p>To: ${email.recipients}</p> 
@@ -605,13 +605,13 @@ function mark_del(email, element, mailbox) {
 }
 
 // add email viewing to the html page
-function veiw_email(email_id, element, mailbox) {
+function veiw_email(department_id, element, mailbox) {
 
   document.querySelector('.navbar').style.display = $(window).width() <= 768 ? "none" :"flex";
   document.querySelector("#emails-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "none";
   // console.log(id);
-  fetch(`/emails/${email_id}`)
+  fetch(`/emails/${department_id}`)
     .then((response) => response.json())
     .then((email) => {
       if(email.error){
@@ -665,7 +665,7 @@ function veiw_email(email_id, element, mailbox) {
           ${user_avatar}
             <div class="sing-username-wrapper">
             	<div class="sing-username">
-            	  <p class="d-inline-block text-truncate p-0 m-0"><strong>${sender}</strong>  <span class="detail-small d-none d-lg-inline"><span><</span>${email.sender}></span> </p>
+            	  <p class="d-inline-block text-truncate p-0 m-0"><strong>${email.sender}</strong> </p>
             	</div>
             
             	<div class="dropdown">
@@ -675,7 +675,7 @@ function veiw_email(email_id, element, mailbox) {
                   <tbody>
                     <tr class="py-0">
                       <td class="text-muted text-right">From:</td>
-                      <td><span class="font-weight-bold">${email.username}</span> . ${email.sender}</td>
+                      <td><span class="font-weight-bold">${email.sender}</span>}</td>
                     </tr>
                     <tr>
                       <td class="text-muted text-right">To:</td>
