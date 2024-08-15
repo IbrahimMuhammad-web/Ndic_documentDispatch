@@ -18,12 +18,18 @@ class Email(models.Model):
     sender = models.ForeignKey("DepartmentZoneUnit", on_delete=models.CASCADE, null=True, related_name="emails_sent")
     recipients = models.ManyToManyField("DepartmentZoneUnit", related_name="emails_received")
     subject = models.CharField(max_length=255)
-    body = models.TextField(blank=True)
+    # body = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
+    mail_type = models.CharField(max_length=200, null=False, default="Internal")
+    amount = models.IntegerField(null=True, blank=True)
+    referenceCode = models.CharField(max_length=200, null=True)
+    mail_through = models.CharField(max_length=200, null=True, blank=True)    
+    deleted = models.BooleanField(default=False,blank=True)
+    
+    
     archived = models.BooleanField(default=False)
     starred = models.BooleanField(default=False,blank=True)
-    deleted = models.BooleanField(default=False,blank=True)
 
 
 # thinking about adding a department field in email and possibly removing the user field
@@ -35,7 +41,6 @@ class Email(models.Model):
             "sender": self.sender.department,
             "recipients": [recipients.department for recipients in self.recipients.all()],
             "subject": self.subject,
-            "body": self.body,
             "timestamp": self.timestamp.strftime("%b %d-%Y-%H:%M %p" ),
             "read": self.read,
             "archived": self.archived,
@@ -43,3 +48,18 @@ class Email(models.Model):
             "deleted": self.deleted,
 
         }
+
+class ExternalMailsRecord(models.Model):
+    type = (
+        ('Incoming', 'Incoming'),
+        ('Outgoing', 'Outgoing'),
+    )
+    department = models.ForeignKey("DepartmentZoneUnit", on_delete=models.SET_NULL, null=True, related_name="departments")
+    mail_type = models.CharField(max_length=200, null=False, choices=type)
+    sender = models.CharField(max_length=200)
+    mail_through = models.CharField(max_length=200)
+    recipients = models.CharField(max_length=200)
+    subject = models.TextField(null=False)
+    amount = models.IntegerField()
+    referenceCode = models.CharField(max_length=200)
+    timestamp = models.DateTimeField(auto_now_add=True)

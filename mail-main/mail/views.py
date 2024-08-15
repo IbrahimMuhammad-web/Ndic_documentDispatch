@@ -39,7 +39,7 @@ def compose(request):
             "error": "At least one recipient required."
         }, status=400)
 
-    # Convert email addresses to users
+    # convert many departments to a list of department
     recipients = []
     for department in departments:
         try:
@@ -52,8 +52,9 @@ def compose(request):
 
     # Get contents of email
     subject = data.get("subject", "")
-    body = data.get("body", "")
-
+    through = data.get("through", "")
+    amount = data.get("amount", "")
+    refCode = data.get("refCode", "")
     # Create one email for each recipient, plus sender
     users = set()
     users.add(request.user.department)
@@ -63,7 +64,9 @@ def compose(request):
             department=user,
             sender=request.user.department,
             subject=subject,
-            body=body,
+            mail_through=through,
+            amount=amount,
+            referenceCode=refCode,
             read=user == request.user
         )
         email.save()
@@ -71,7 +74,7 @@ def compose(request):
             email.recipients.add(recipient)
         email.save()
 
-    return JsonResponse({"message": "Email sent successfully."}, status=201)
+    return JsonResponse({"message": "Mail sent successfully."}, status=201)
 
 # this function is where that things in the page(mails) are filtered and displayed
 # query all mails based on the user's departments

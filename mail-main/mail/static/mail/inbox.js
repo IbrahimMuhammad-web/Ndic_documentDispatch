@@ -145,7 +145,7 @@ function compose_email(email = null, status="") {
         editor.setData("");
         if (email !== null && status === "reply") {
           editor.setData(
-            `<p> On ${email.timestamp} ${email.sender} wrote: </p> ${email.body}`
+            `<p> On ${email.timestamp} ${email.sender} wrote: </p> ${email.subject}`
           );
         }
         else if (email !== null && status === "forward") {
@@ -182,10 +182,14 @@ function compose_email(email = null, status="") {
 
   // Clear out composition fields
   document.querySelector("#title").textContent = "New Mail";
+  document.querySelector("#compose-through").value = "";
   document.querySelector("#compose-recipients").value = "";
   document.querySelector("#compose-subject").value = "";
-  document.querySelector("#compose-body").innerHTML = "";
+  document.querySelector("#compose-amount").value = "";
+  document.querySelector("#compose-refCode").value = "";
 
+
+  // for reply (delete it later)
   if (email !== null && status === "reply") {
     document.querySelector("#title").textContent = "Reply";
     document.querySelector("#compose-recipients").value = email.sender;
@@ -198,6 +202,7 @@ function compose_email(email = null, status="") {
     // document.querySelector("#compose-body").innerHTML = `<p> On ${email.timestamp} ${email.sender} wrote: </p> ${email.body}`;
   }
 
+  // for reply (delete it later)
   else if (email !== null && status === "forward") {
     document.querySelector("#title").textContent = "Forward";
     document.querySelector("#compose-recipients").focus();
@@ -211,17 +216,22 @@ function compose_email(email = null, status="") {
   }
 
   document.querySelector("#compose-form").onsubmit = () => {
+    const through = document.querySelector("#compose-through").value;
     const recipients = document.querySelector("#compose-recipients").value;
     const subject = document.querySelector("#compose-subject").value;
-    let body = document.querySelector("#compose-body").innerHTML;
+    const amount = document.querySelector("#compose-amount").value;
+    const refCode = document.querySelector("#compose-refCode").value;
     // console.log(body)
 
     fetch("/emails", {
       method: "POST",
       body: JSON.stringify({
+        through: through,
         recipients: recipients,
         subject: subject,
-        body: body,
+        amount: amount,
+        refCode: refCode,
+
       }),
     })
       .then((response) => response.json())

@@ -12,7 +12,7 @@
     </div>
 
     <div class="border p-0 m-0" id="compose-view">
-        <h3 class="border-bottom py-2 pl-3 mb-2" id="title">New Email</h3>
+        <h3 class="border-bottom py-2 pl-3 mb-2" id="title">New Mail</h3>
         <form id="compose-form" class="px-md-3 px-sm-0 pt-3">
             <div class="form-group border-bottom mx-2">
                  <div class="input-group">
@@ -22,6 +22,16 @@
                     <input disabled class="form-control bg-white" value="{{ request.user.department }}">
                   </div>
             </div>
+
+            <div class="form-group border-bottom mx-2">
+              <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-white border-0" id="through">Through</span>
+                  </div>
+                  <input id="compose-through" class="form-control" >
+                </div>
+          </div>
+
             <div class="form-group border-bottom mx-2">
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -33,7 +43,15 @@
             <div class="form-group border-bottom mx-2 mb-1" >
                 <input class="form-control" id="compose-subject" placeholder="Subject">
             </div>
-            <div  id="compose-body" class="mx-2"></div>
+
+            <div class="form-group border-bottom mx-2 mb-1" >
+              <input class="form-control" id="compose-amount" placeholder="Amount">
+          </div>
+
+          <div class="form-group border-bottom mx-2 mb-1" >
+            <input class="form-control" id="compose-refCode" placeholder="Reference Code">
+        </div>
+
             <button type="submit" class="btn btn-primary ml-3" id="submit-btn"><i class='fas fa-paper-plane pr-2'></i>Send</button>
         </form>
     </div>  
