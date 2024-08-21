@@ -8,7 +8,7 @@ class DepartmentZoneUnit(models.Model):
         return self.department
 
 class User(AbstractUser):
-    department = models.ForeignKey("DepartmentZoneUnit", on_delete=models.CASCADE, default="ITD") # add default department for users after adding departments to the database
+    department = models.ForeignKey("DepartmentZoneUnit", on_delete=models.CASCADE, default="BZO") # add default department for users after adding departments to the database
     # this is returning an id for user's department instead of the department name, find a way to override it to return department name instead of department id
     def __str__(self):
         return f"{self.email}"
@@ -28,8 +28,6 @@ class Email(models.Model):
     deleted = models.BooleanField(default=False,blank=True)
     
     
-    archived = models.BooleanField(default=False)
-    starred = models.BooleanField(default=False,blank=True)
 
 
 # thinking about adding a department field in email and possibly removing the user field
@@ -43,8 +41,6 @@ class Email(models.Model):
             "subject": self.subject,
             "timestamp": self.timestamp.strftime("%b %d-%Y-%H:%M %p" ),
             "read": self.read,
-            "archived": self.archived,
-            "starred": self.starred,
             "deleted": self.deleted,
 
         }

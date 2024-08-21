@@ -115,20 +115,12 @@ def mailbox(request, mailbox):
     user_department = request.user.department.department
     if mailbox == "inbox":
         emails = Email.objects.filter(
-            department=user_department, recipients=user_department, archived=False, deleted=False,
+            department=user_department, recipients=user_department, deleted=False,
         )
     elif mailbox == "sent":
         emails = Email.objects.filter(
             department=user_department, sender=user_department, deleted=False,
         )
-    elif mailbox == "archive":
-        emails = Email.objects.filter(
-            department=user_department, archived=True, deleted=False,
-        ).filter( Q(sender=user_department) |Q(recipients=user_department))
-    elif mailbox == "starred":
-        emails = Email.objects.filter(
-            department=user_department, starred=True, deleted=False,
-        ).filter( Q(sender=user_department) |Q(recipients=user_department))
     elif mailbox == "trash":
         emails = Email.objects.filter(
             department=user_department, deleted=True
@@ -156,15 +148,11 @@ def email(request, department_id):
     if request.method == "GET":
         return JsonResponse(email.serialize())
 
-    # Update whether email is read or should be archived
+    # Update whether email is read or deleted
     elif request.method == "PUT":
         data = json.loads(request.body)
         if data.get("read") is not None:
             email.read = data["read"]
-        if data.get("archived") is not None:
-            email.archived = data["archived"]
-        if data.get("starred") is not None:
-            email.starred = data["starred"]
         if data.get("deleted") is not None:
             email.deleted = data["deleted"]
         email.save()

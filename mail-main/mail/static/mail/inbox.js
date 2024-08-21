@@ -333,7 +333,6 @@ function compose_External_email(email = null, status="") {
   };
 }
 
-
 function load_mailbox(mailbox, query = "") {
   tog_menu();
 
@@ -404,7 +403,7 @@ function load_mailbox(mailbox, query = "") {
         element.style.cursor = "pointer";
         element.innerHTML = `
         ${(() => {
-          // let  archive_btn =
+
 
           let sender = email.username;
           let user_avatar = `<div class="user-icon-wrapper" >
@@ -425,8 +424,6 @@ function load_mailbox(mailbox, query = "") {
             sender = `To: ${sendto}`;
           }
 
-          let archive_stat = email.archived ? "Unarchive" : "Archive";
-          let star_stat = email.starred ? "Starred" : "Not starred"
           let del_stat = email.deleted ? "Restore" : "Delete"
 
           let mark_read_stat = "Mark as Unread";
@@ -439,33 +436,22 @@ function load_mailbox(mailbox, query = "") {
             element.classList.remove("unread");
           }
 
-          let archive_slash = email.archived
-            ? `<i class="fas fa-slash"></i>`
-            : "";
           let mark_class = email.read ? "fa-envelope-open" : "fa-envelope";
-          let star_class = email.starred ? "fas" : "far";
           let del_class = email.deleted ? "fa-recycle" : "fa-trash";
           let del_forever = mailbox === "trash" ?`<li class="btn-item del_forever" data-toggle="tooltip" data-placement="bottom" title="Delete forever"><i class="fas fa-trash"></i></li>   ` :"";
           let ext_btn = mailbox === "trash" ? "ext_btn": "";
           // mail design layout html code
           return `
             ${user_avatar}
-            <div class="star-wrapper"  data-toggle="tooltip" data-placement="bottom" title="${star_stat}">
-              <span class="star"> <i class="${star_class} fa-star"></i> </span>
-            </div>
             <div class="sender">${sender}</div>
             <div class="subject text-left">
               <div class="d-inline">${
                 email.subject.length > 0 ? email.subject : "(no subject)"
               }</div>
-            <span class="text-muted font-weight-normal">${email.body.replace(
-              /<(.|\n)*?>/gi,
-              " "
-            )}</span></div>
+            </div>
             <div class="timestamp ${ext_btn}">
             <span id="time">${readable_date(email.timestamp)}</span>
             <ul class="btn-list">
-                <li class="btn-item archive" id="archive" data-toggle="tooltip" data-placement="bottom" title="${archive_stat}" >${archive_slash}</li>
                 <li class="btn-item mark-read" data-toggle="tooltip" data-placement="bottom" title="${mark_read_stat}"><i class="fas ${mark_class}"></i></li>
                 <li class="btn-item delete" data-toggle="tooltip" data-placement="bottom" title="${del_stat}"><i class="fas ${del_class}"></i></li>   
                 ${del_forever}
@@ -498,8 +484,6 @@ function load_mailbox(mailbox, query = "") {
         );
 
         mark_read(email, element, mailbox);
-        mark_archive(email, element, mailbox);
-        mark_star(email, element, mailbox);
         mark_del(email, element, mailbox);
         if(mailbox === "trash"){
           element.querySelector(".del_forever").addEventListener("click", (e)=>{
@@ -562,38 +546,7 @@ function load_mailbox(mailbox, query = "") {
     });
 }
 
-function mark_archive(email, element, mailbox) {
-  element.querySelector("#archive").addEventListener(
-    "click",
-    (e) => {
-      if (mailbox !== "archive" && mailbox !== "trash" ) {
-        fetch(`/emails/${email.id}`, {
-          method: "PUT",
-          body: JSON.stringify({
-            archived: true,
-          }),
-        });
-        custm_alert("Conversation archived")
-        // element.querySelector(":scope > #archive").classList.remove('archive')
-        // element.querySelector(":scope > #archive").classList.add('unarchive')
-      } else if (mailbox === "archive") {
-        fetch(`/emails/${email.id}`, {
-          method: "PUT",
-          body: JSON.stringify({
-            archived: false,
-          }),
-        });
-        custm_alert("Conversation moved to inbox")
-      }
-      $(element.querySelector("#archive")).tooltip("hide");
-      if(mailbox !== "trash"){
-        hide_element(element);
-      }
-      e.stopImmediatePropagation();
-    },
-    false
-  );
-}
+
 function mark_read(email, element, mailbox) {
   element.querySelector(".mark-read").addEventListener(
     "click",
@@ -639,44 +592,6 @@ function mark_read(email, element, mailbox) {
     },
     false
   );
-}
-
-function mark_star(email, element, mailbox) {
-  element.querySelector(".star-wrapper").addEventListener("click", (e) => {
-    let star = element.querySelector(".fa-star");
-    if (star.classList.contains("fas")) {
-      star.classList.remove("fas"),
-        star.classList.add("far"),
-        $(element.querySelector(".star-wrapper"))
-          .attr("data-original-title", "Not starred")
-          .tooltip("show");
-
-      fetch(`/emails/${email.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          starred: false,
-        }),
-      });
-      if (mailbox === "starred") {
-        $(element.querySelector(".star-wrapper")).tooltip("hide");
-        hide_element(element);
-      }
-    } else {
-      star.classList.add("fas"),
-        $(element.querySelector(".star-wrapper"))
-          .attr("data-original-title", "Starred")
-          .tooltip("show");
-      fetch(`/emails/${email.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          starred: true,
-        }),
-      });
-    }
-
-    e.stopImmediatePropagation();
-    $('[data-toggle="tooltip"]').tooltip();
-  });
 }
 
 function mark_del(email, element, mailbox) {
@@ -733,8 +648,7 @@ function veiw_email(department_id, element, mailbox) {
       $(element.querySelector("#check-email .mark-read"))
         .attr("data-original-title", "Mark as unread")
   }
-  let star_title = email.starred ? "Starred": "Not Starred"
-  let star_class = email.starred ? "fas" : "far";
+
   let sender = email.username;
   let user_avatar = `<div class="sing-icon-wrapper" >
                      <span class="sing-icon rounded-circle text-white" style="background-color:${calculateColor(
@@ -805,7 +719,6 @@ function veiw_email(department_id, element, mailbox) {
             </div>
          
             <div class="timestamp-icons pl-2">
-              <span class="st" data-toggle="tooltip" data-placement="bottom" title="${star_title}" style="cursor:pointer"> <i class="${star_class} fa-star"></i> </span>
               <span data-toggle="tooltip" data-placement="bottom" title="Reply"><i class="fas fa-reply pl-3 replybtn" ></i></span>
           </div>
           </div>
@@ -830,15 +743,8 @@ function veiw_email(department_id, element, mailbox) {
             history.pushState({ query: query }, "", `./#search/${query}`);
           }
           history.pushState({ mailbox: mailbox }, "", `./#${mailbox}`);
- 
-        if(btn_item.classList.contains("archive")) {
-          // mark_archive(email,element,mailbox)
-           
-          $(element.querySelector("#archive")).click()
-            // hide_element(element);           
-        }
 
-        else if(btn_item.classList.contains("mark-read"))
+        if(btn_item.classList.contains("mark-read"))
         {
           // load_mailbox(mailbox)
           $(element.querySelector(".mark-read")).click()
@@ -864,37 +770,7 @@ function veiw_email(department_id, element, mailbox) {
         }
         })
       })
-      document.querySelector(".st").addEventListener("click" , (e) =>{
-        let star = document.querySelector(".st .fa-star");
-        if (star.classList.contains("fas")) {
-          star.classList.remove("fas"),
-            star.classList.add("far"),
-            $( document.querySelector(".st"))
-              .attr("data-original-title", "Not starred")
-              .tooltip("show");
-    
-          fetch(`/emails/${email.id}`, {
-            method: "PUT",
-            body: JSON.stringify({
-              starred: false,
-            }),
-          });
-         
-        } else {
-          star.classList.add("fas"),
-            $(document.querySelector(".st"))
-              .attr("data-original-title", "Starred")
-              .tooltip("show");
-          fetch(`/emails/${email.id}`, {
-            method: "PUT",
-            body: JSON.stringify({
-              starred: true,
-            }),
-          });
-        }
-    
-        // e.stopImmediatePropagation();
-      });
+
       let replybtns =  document.querySelectorAll(".replybtn")
       replybtns.forEach((btn) => {
         btn.addEventListener("click", (e) => {
@@ -989,5 +865,3 @@ function calculateColor(email) {
   // console.log(sum % colors.length)
   return colors[sum % colors.length];
 }
-
-// Added external mails forms remaining mailbox display

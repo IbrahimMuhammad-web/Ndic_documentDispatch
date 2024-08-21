@@ -350,15 +350,6 @@ width: 25px;
 #trash{
     padding-left: 1.2rem;
 }
-.archive_btn{
-    height: 18px;
- padding-right: 12px;
- padding-left: 8px;
-}
-.archive{
-    background-image: url(https://www.gstatic.com/images/icons/material/system/1x/archive_black_20dp.png);
-    background-size: 20px;
-}
  .fa-slash{
     position:relative;
     font-size: 1.1rem;
