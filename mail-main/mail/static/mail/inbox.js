@@ -125,6 +125,19 @@ document.addEventListener("DOMContentLoaded", function () {
       compose_email()
     }
   });
+  document.querySelector("#compose-title").addEventListener("click", () => {
+    if(document.querySelector("#compose-view").style.display === "none"){
+      compose_email()
+    }
+  });
+  document.querySelector("#Exmail").addEventListener("click", () => {
+    if(document.querySelector("#External-view").style.display === "none"){
+      compose_External_email()
+    }
+    else if(document.querySelector("#External-view").style.display !== "none"){
+      compose_External_email()
+    }
+  });
   // history.pushState({compose : }, "", `./#${link.id}`)
   // By default, load the inbox
   load_mailbox("inbox");
@@ -161,6 +174,9 @@ function compose_email(email = null, status="") {
         document.querySelector("#compose").addEventListener("click", () => {
           editor.setData("");
         });
+        document.querySelector("#compose-title").addEventListener("click", () => {
+          editor.setData("");
+        });
         // destroy editor instance if the compose view is not visible
         let targetNode = document.querySelector("#compose-view");
         let observer = new MutationObserver(function () {
@@ -179,9 +195,11 @@ function compose_email(email = null, status="") {
   document.querySelector("#emails-view").style.display = "none";
   document.querySelector("#check-email").style.display = "none";
   document.querySelector("#compose-view").style.display = "block";
+  document.querySelector("#External-view").style.display = "none";
+  document.querySelector("#title").style.display = "block";
+  
 
   // Clear out composition fields
-  document.querySelector("#title").textContent = "New Mail";
   document.querySelector("#compose-through").value = "";
   document.querySelector("#compose-recipients").value = "";
   document.querySelector("#compose-subject").value = "";
@@ -245,6 +263,77 @@ function compose_email(email = null, status="") {
   };
 }
 
+function compose_External_email(email = null, status="") {
+  tog_menu(); // toggle sidebar when on mobile devices
+  if($(window).width() <= 768){
+    document.querySelector('.navbar').style.display = "flex";
+  }
+  // Initialize the rich text editor for composing the email body
+  if (document.querySelector("#External-view").style.display === "none") {
+    // create new instance of balloonEditor
+    BalloonEditor.create(document.querySelector("#External-body"))
+      .then((editor) => {
+        // console.log( editor );
+        editor.setData("");
+        document.querySelector("#Exmail").addEventListener("click", () => {
+          editor.setData("");
+        });
+        // destroy editor instance if the compose view is not visible
+        let targetNode = document.querySelector("#External-view");
+        let observer = new MutationObserver(function () {
+          if (targetNode.style.display == "none") {
+            editor.destroy();
+          }
+        });
+        observer.observe(targetNode, { attributes: true });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  // Show external view and hide other views
+  document.querySelector("#emails-view").style.display = "none";
+  document.querySelector("#check-email").style.display = "none";
+  document.querySelector("#compose-view").style.display = "none";
+  document.querySelector("#External-view").style.display = "block";
+  document.querySelector("#title").style.display = "block";
+
+  // Clear out composition fields
+  document.querySelector("#External-type").value = "";
+  document.querySelector("#External-through").value = "";
+  document.querySelector("#External-recipients").value = "";
+  document.querySelector("#External-subject").value = "";
+
+
+  document.querySelector("#External-form").onsubmit = () => {
+    const type = document.querySelector("#External-type").value;
+    const through = document.querySelector("#External-through").value;
+    const recipients = document.querySelector("#External-recipients").value;
+    const subject = document.querySelector("#External-subject").value;
+    // console.log(body)
+
+    fetch("/external_emails", {
+      method: "POST",
+      body: JSON.stringify({
+        type: type,
+        through: through,
+        recipients: recipients,
+        subject: subject,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        // Print result
+        // console.log(result);
+        custm_alert(result);
+      });
+
+    return false;
+  };
+}
+
+
 function load_mailbox(mailbox, query = "") {
   tog_menu();
 
@@ -265,6 +354,9 @@ function load_mailbox(mailbox, query = "") {
   document.querySelector("#emails-view").style.display = "block";
   document.querySelector("#check-email").style.display = "none";
   document.querySelector("#compose-view").style.display = "none";
+  document.querySelector("#External-view").style.display = "none";
+  document.querySelector("#title").style.display = "none";
+
 
   // Show the mailbox name
   // console.log(mailbox);
@@ -620,6 +712,8 @@ function veiw_email(department_id, element, mailbox) {
   document.querySelector('.navbar').style.display = $(window).width() <= 768 ? "none" :"flex";
   document.querySelector("#emails-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "none";
+  document.querySelector("#External-view").style.display = "none";
+  document.querySelector("#title").style.display = "none";
   // console.log(id);
   fetch(`/emails/${department_id}`)
     .then((response) => response.json())
@@ -630,6 +724,7 @@ function veiw_email(department_id, element, mailbox) {
       }
       else{
         document.querySelector("#check-email").style.display = "block";
+        document.querySelector("#External-view").style.display = "none";
         let read = element.querySelector(".mark-read > i");
   // console.log(read)
   if(read.classList.contains("fa-envelope")){
@@ -894,3 +989,5 @@ function calculateColor(email) {
   // console.log(sum % colors.length)
   return colors[sum % colors.length];
 }
+
+// Added external mails forms remaining mailbox display

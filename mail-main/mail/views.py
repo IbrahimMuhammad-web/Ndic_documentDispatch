@@ -3,13 +3,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import JsonResponse
-from django.shortcuts import HttpResponse, HttpResponseRedirect, render
+from django.shortcuts import HttpResponse, HttpResponseRedirect, render, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from functools import reduce
 import operator
-from .models import User, Email, DepartmentZoneUnit
+from .models import User, Email, DepartmentZoneUnit, ExternalMailsRecord
 
 
 def index(request):
@@ -75,6 +75,36 @@ def compose(request):
         email.save()
 
     return JsonResponse({"message": "Mail sent successfully."}, status=201)
+
+@csrf_exempt
+@login_required
+def compose_external(request):
+
+    # Composing a new email must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+   
+    data = json.loads(request.body)
+
+    # Get contents of email
+    type = data.get("type", "")
+    recipients = data.get("recipients", "")
+    subject = data.get("subject", "")
+    through = data.get("through", "")
+
+    email = ExternalMailsRecord(
+            department=request.user.department,
+            mail_type = type,
+            sender=request.user.department,
+            subject=subject,
+            mail_through=through,
+            recipients=recipients,
+    )
+    email.save()
+
+    return JsonResponse({"message": "Mail sent successfully."}, status=201)
+
 
 # this function is where that things in the page(mails) are filtered and displayed
 # query all mails based on the user's departments
@@ -166,6 +196,32 @@ def search(request, query):
         return JsonResponse([email.serialize() for email in emails], safe=False)
     else:
         return JsonResponse({"error": "No result Found"}, status=404)
+    
+@login_required
+def admin_dashboard(request, username):
+    user = get_object_or_404(User, username=username)
+    
+    user_department = request.user.department.department
+    
+    emailsReceived = Email.objects.filter(
+            department=user_department, recipients=user_department, deleted=False,
+        ).count()
+    
+    emailsSent = Email.objects.filter(
+            department=user_department, sender=user_department, deleted=False,
+        ).count()
+    
+    totalUsers = User.objects.filter(
+        department=user_department
+    ).count()
+    context = {
+        'user': user,
+        'emailsReceived': emailsReceived,
+        'emailsSent': emailsSent,
+        'totalUsers' : totalUsers
+    }
+    return render(request, 'mail/adminDash.html', context)
+
 
 
 def login_view(request):
@@ -222,3 +278,4 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "mail/register.html")
+

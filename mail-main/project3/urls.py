@@ -19,7 +19,8 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('mail.urls'))
+    path('', include('mail.urls')),
+    path('admin_dashboard', include('mail.urls')),
 ]
 
 # if not settings.DEBUG:
