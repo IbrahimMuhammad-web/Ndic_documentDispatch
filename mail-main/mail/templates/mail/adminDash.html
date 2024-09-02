@@ -9,14 +9,15 @@
             <h4>Admin Dashboard</h4>
         </div>
         <div class="row">
-            <div class="col-12 col-md-6 d-flex">
-                <div class="card flex-fill border-0 illustration">
+            
+            <div class="col-12 col-md-6 d-flex" >
+                <div class="card flex-fill border-0 illustration" style="background: blue; color:white;">
                     <div class="card-body p-0 d-flex flex-fill">
                         <div class="row g-0 w-100">
                             <div class="col-6">
                                 <div class="p-3 m-1">
-                                    <h4>Welcome Back, Admin</h4>
-                                    <p class="mb-0">Admin Dashboard, CodzSword</p>
+                                    <h4>Welcome Back, {{request.user.username.capitalize}}</h4>
+                                    <p class="mb-0">Admin Dashboard, {{request.user.department}}</p>
                                 </div>
                             </div>
                             <div class="col-6 align-self-end text-end">
@@ -28,15 +29,15 @@
                 </div>
             </div>
             <div class="col-12 col-md-6 d-flex">
-                <div class="card flex-fill border-0">
+                <div class="card flex-fill border-0" style="background: green; color:white;">
                     <div class="card-body py-4">
                         <div class="d-flex align-items-start">
                             <div class="flex-grow-1">
                                 <h4 class="mb-2">
-                                    7653
+                                    {{totalUsers}}
                                 </h4>
                                 <p class="mb-2">
-                                    Total Users
+                                    Total Users in {{request.user.department}}
                                 </p>
                                 <!-- <div class="mb-0">
                                     <span class="badge text-success me-2">
@@ -74,62 +75,54 @@
                 <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">New User</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form class="row g-3">
+                        {% if message %}
+                            <div>{{ message }}</div>
+                        {% endif %}
+                        <form class="row g-3" action="{% url 'admin_dashboard' username=request.user.username %}" method="post">
+                            {% csrf_token %}
                             <div class="row g-3">
                                 <label for="inputName4" class="form-label">Employee Name <span style="color: red;">*</span></label>
                                 <div class="col">
-                                <input type="text" class="form-control" placeholder="First name" aria-label="First name">
+                                <input type="text" class="form-control" name="fname" placeholder="First name" aria-label="First name" required>
                                 </div>
                                 <div class="col">
-                                <input type="text" class="form-control" placeholder="Last name" aria-label="Last name">
+                                <input type="text" class="form-control" name="lname" placeholder="Last name" aria-label="Last name" required>
                                 </div>
                             </div>
                             <div class="col-md-8">
                             <label for="inputEmail4" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="inputEmail4">
+                            <input type="email" name="email" class="form-control" id="inputEmail4">
                             </div>
                             <div class="col-7">
                                 <label for="username" class="form-label">Employee Username <span style="color: red;">*</span></label>
-                                <input type="text" class="form-control" id="username" placeholder="Username">
+                                <input type="text" name="username" class="form-control" id="username" placeholder="Username" required>
                             </div>
                             <div class="col-md-6">
                             <label for="inputPassword4" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="inputPassword4">
+                            <input type="password" name="password" class="form-control" id="inputPassword4" required>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="inputPassword4" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" id="inputPassword4">
+                                <input type="password" name="confirmation" class="form-control" id="inputPassword4" required>
                             </div>
                             
                             <div class="col-md-6">
                             <label for="userType" class="form-label">User Type</label>
-                            <select id="inputState" class="form-select">
-                                <option selected>Choose...</option>
-                                <option>...</option>
+                            <select id="inputState"  name="group" class="form-select" required>
+                                {% for group in groups %}
+                                    <option value="{{ group.name }}">{{ group.name.capitalize }}</option>
+                                {% endfor %}
                             </select>
-                            <div class="col-md-6">
-                                <label for="userType" class="form-label">User role</label>
-                                <select id="inputState" class="form-select">
-                                <option selected>Choose...</option>
-                                <option>...</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="userType" class="form-label">Department</label>
-                                <select id="inputState" class="form-select">
-                                <option selected>Choose...</option>
-                                <option>...</option>
-                                </select>
-                            </div>
-                            </div>
+                        </div>
+                            
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Understood</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
                             </div>
                         </form>
                     </div>
@@ -139,34 +132,26 @@
         </h6>
             </div>
             <div class="card-body">
+                
                 <table class="table">
                     <thead>
                         <tr>
-                            <th scope="col">#</th>
                             <th scope="col">First</th>
                             <th scope="col">Last</th>
-                            <th scope="col">Handle</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Email</th>
                         </tr>
                     </thead>
+                    {% for entry in last_5_users %}
                     <tbody>
                         <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td colspan="2">Larry the Bird</td>
-                            <td>@twitter</td>
+                            <td>{{entry.first_name}}</td>
+                            <td>{{entry.last_name}}</td>
+                            <td>{{entry.username}}</td>
+                            <td>{{entry.email}}</td>
                         </tr>
                     </tbody>
+                    {% endfor %}
                 </table>
             </div>
         </div>

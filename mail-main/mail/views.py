@@ -3,12 +3,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import JsonResponse
-from django.shortcuts import HttpResponse, HttpResponseRedirect, render, get_object_or_404
+from django.shortcuts import HttpResponse, HttpResponseRedirect, render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.contrib.auth.models import Group
 from functools import reduce
 import operator
+from django.contrib import messages
 from .models import User, Email, DepartmentZoneUnit, ExternalMailsRecord
 
 
@@ -124,11 +126,11 @@ def mailbox(request, mailbox):
         )
     elif mailbox == "inCourier":
         emails = ExternalMailsRecord.objects.filter(
-            department=user_department, recipients=user_department, deleted=False,
+            department=user_department, mail_type="Incoming", deleted=False,
         )
     elif mailbox == "outCourier":
         emails = ExternalMailsRecord.objects.filter(
-            department=user_department, sender=user_department, deleted=False,
+            department=user_department, mail_type="Outgoing", deleted=False,
         )
     elif mailbox == "trash":
         emails = Email.objects.filter(
@@ -242,11 +244,38 @@ def admin_dashboard(request, username):
     totalUsers = User.objects.filter(
         department=user_department
     ).count()
+    last_5_users = User.objects.filter(department=user_department).order_by('-date_joined')[:5]
+    groups = Group.objects.all()
+    if request.method == "POST":
+        username = request.POST["username"]
+        email = request.POST["email"]
+        first_name = request.POST["fname"]
+        last_name = request.POST["lname"]
+        # Ensure password matches confirmation
+        password = request.POST["password"]
+        confirmation = request.POST["confirmation"]
+        group = request.POST["group"]
+        if password != confirmation:
+            messages.error(request, "passwords don't match")
+
+        # Attempt to create new user
+        try:
+            user = User.objects.create_user(username=username,email=email,password=password,first_name=first_name,last_name=last_name,department=request.user.department)
+            user_group = Group.objects.get(name=group) 
+            user_group.user_set.add(user)
+            user.save()
+        except IntegrityError as e:
+            print(e)
+            messages.error(request, "Email address already taken.")
+        # login(request, user)
+        # return redirect(f"admin_dashboard_{request.user.username}")
     context = {
         'user': user,
         'emailsReceived': emailsReceived,
         'emailsSent': emailsSent,
-        'totalUsers' : totalUsers
+        'totalUsers' : totalUsers,
+        'last_5_users' : last_5_users,
+        'groups': groups
     }
     return render(request, 'mail/adminDash.html', context)
 
@@ -279,31 +308,31 @@ def logout_view(request):
     return HttpResponseRedirect(reverse("index"))
 
 
-def register(request):
-    if request.method == "POST":
-        email = request.POST["email"]
-        first_name = request.POST["fname"]
-        last_name = request.POST["lname"]
-        # Ensure password matches confirmation
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
-        
-        if password != confirmation:
-            return render(request, "mail/register.html", {
-                "message": "Passwords must match."
-            })
+# @login_required
+# def register(request):
+#     if request.method == "POST":
+#         username = request.POST["username"]
+#         email = request.POST["email"]
+#         first_name = request.POST["fname"]
+#         last_name = request.POST["lname"]
+#         # Ensure password matches confirmation
+#         password = request.POST["password"]
+#         confirmation = request.POST["confirmation"]
+#         group = request.POST["group"]
+#         if password != confirmation:
+#             messages.error(request, "passwords don't match")
 
-        # Attempt to create new user
-        try:
-            user = User.objects.create_user(username=email,email=email,password=password,first_name=first_name,last_name=last_name)
-            user.save()
-        except IntegrityError as e:
-            print(e)
-            return render(request, "mail/register.html", {
-                "message": "Email address already taken."
-            })
-        login(request, user)
-        return HttpResponseRedirect(reverse("index"))
-    else:
-        return render(request, "mail/register.html")
+#         # Attempt to create new user
+#         try:
+#             user = User.objects.create_user(username=username,email=email,password=password,first_name=first_name,last_name=last_name,department=request.user.department)
+#             user_group = Group.objects.get(name=group) 
+#             user_group.user_set.add(user)
+#             user.save()
+#         except IntegrityError as e:
+#             print(e)
+#             messages.error(request, "Email address already taken.")
+#         # login(request, user)
+#         return HttpResponseRedirect(reverse("admin_dashboard"))
+#     else:
+#         return render(request, "mail/adminDash.html")
 
