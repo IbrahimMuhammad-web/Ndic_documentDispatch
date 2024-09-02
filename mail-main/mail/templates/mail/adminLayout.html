@@ -1,90 +1,162 @@
+{% load static %}
+
 <!DOCTYPE html>
-<!--=== Coding by CodingLab | www.codinglabweb.com === -->
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    {% load static %}
-    <!----======== CSS ======== -->
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/ae360af17e.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{% static 'mail/adminLayout.css' %}">
-     
-    <!----===== Iconscout CSS ===== -->
-    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <link rel="stylesheet" href="{% static 'mail/profile.css' %}">
+    <script src="https://cdn.ckeditor.com/ckeditor5/24.0.0/balloon/ckeditor.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="shortcut icon" href="{% static '/mail/img/DocumentDispatch whiteBG.png' %}" >
 
-    {% block additionalStyles %}{% endblock %}
-    <title>{% block title %}Admin Dashboard Panel{% endblock %}</title> 
+    <!-- data tables -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.4/css/dataTables.bootstrap5.css">
+
+
+    
 </head>
+
 <body>
-    <nav>
-        <div class="logo-name">
-            <div class="logo-image">
-                <img src="{% static '/mail/img/DocumentDispatch whiteBG.png' %}" alt="" style="width: 50px;">
-            </div>
-
-            <span class="logo_name">Dispatch</span>
-        </div>
-
-        <div class="menu-items">
-            <ul class="nav-links">
-                <li><a href="#">
-                    <i class="uil uil-estate"></i>
-                    <span class="link-name">Dashboard</span>
-                </a></li>
-                <li><a href="userPage.html">
-                    <i class="uil uil-files-landscapes"></i>
-                    <span class="link-name">Users</span>
-                </a></li>
-                <li><a href="#">
-                    <i class="uil uil-chart"></i>
-                    <span class="link-name">Report</span>
-                </a></li>
-                <li><a href="#">
-                    <i class="uil uil-share"></i>
-                    <span class="link-name">Go to User Page</span>
-                </a></li>
-            </ul>
-            
-            <ul class="logout-mode">
-                <li><a href="#">
-                    <i class="uil uil-signout"></i>
-                    <span class="link-name">Logout</span>
-                </a></li>
-
-                <li class="mode">
-                    <a href="#">
-                        <i class="uil uil-moon"></i>
-                    <span class="link-name">Dark Mode</span>
-                </a>
-
-                <div class="mode-toggle">
-                  <span class="switch"></span>
+    {% if user.is_authenticated %}
+    <div class="wrapper">
+        <aside id="sidebar" class="js-sidebar">
+            <!-- Content For Sidebar -->
+            <div class="h-100">
+                <div class="sidebar-logo">
+                    <a href="#">CodzSword</a>
                 </div>
-            </li>
-            </ul>
-        </div>
-    </nav>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">
 
-    <section class="dashboard">
-        <div class="top">
-            <i class="uil uil-bars sidebar-toggle"></i>
+                    </li>
+                    <li class="sidebar-header">
 
-            <div class="search-box">
-                <i class="uil uil-search"></i>
-                <input type="text" placeholder="Search here...">
+                    </li>
+                    <li class="sidebar-item">
+                        <a id="admin-dashboard" style="color: white;" class="sidebar-link nav-link">
+                            <i class="fa-solid fa-list pe-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a id="user-table" style="color: white;" class="sidebar-link nav-link">
+                            <i class="fa-solid fa-list pe-2"></i>
+                            Users
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-target="#mails" data-bs-toggle="collapse"
+                            aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
+                            Mails
+                        </a>
+                        <ul id="mails" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a id="internal-mails" style="color: white;" class="sidebar-link nav-link">Internal</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a id="external-mails" style="color: white;" class="sidebar-link nav-link">External</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-target="#reports" data-bs-toggle="collapse"
+                            aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
+                            Reports
+                        </a>
+                        <ul id="reports" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebsar-item">
+                                <a id="internal-reports" class="sidebar-link">Internal</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a id="external-reports" class="sidebar-link">External</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="sidebar-item">
+                        <a id="trash" class="sidebar-link">
+                            <i class="fa-solid fa-list pe-2"></i>
+                            Recently Deleted
+                        </a>
+                    </li>
+                
+                </ul>
             </div>
+        </aside>
+        <div class="main">
+            <nav class="navbar navbar-expand px-3 border-bottom">
+                <button class="btn" id="sidebar-toggle" type="button">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse navbar">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                          <div class="dropdown dropdown-user"> 
+                            <a class="dropdown-toggle text-light h6 text-decoration-none" href="#" id="dropdownMenuButton" data-toggle="dropdown">
+                                <span class="user-icon rounded-circle text-white"></span></a>
+          
+                            <div class="dropdown-menu dropdown-menu-right shadow border p-4 pt-5" aria-labelledby="dropdownMenuButton">
+                                <div class="text-center border-bottom pb-3">
+                                  <span class=" user-icon user-icon-large rounded-circle text-white">hs</span>
+                                  <h5 class="username mb-0 font-weight-normal" >{{ request.user.first_name}} {{request.user.last_name }}</h5>
+                                  <h6 class="text-muted mt-0 font-weight-normal">{{ request.user.department}}</h6>
+        
+                                </div>
+                           
+                              <a class=" btn btn-danger  text-center btn-block mt-3 "  href="{% url 'logout' %}">Sign out</a>
+                            </div>
             
-            <img src="images/profile.jpg" alt="">
-        </div>
+                          </div>
+                        </li>
+                      </ul>
+                  
+                </div>
+            </nav>
 
-        <div class="dash-content">
             {% block content %}
             
-            {% endblock %}
-        </div>
-    </section>
+            {% endblock  %}
 
+            <footer class="footer py-4  ">
+                <div class="container-fluid">
+                  <div class="row align-items-center justify-content-lg-between">
+                    <div class="col-lg-6 mb-lg-0 mb-4">
+                      <div class="copyright text-center text-sm text-muted text-lg-start">
+                        © <script>
+                          document.write(new Date().getFullYear())
+                        </script>,
+                        Nigeria Deposit Insurance Corporation
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </footer>
+        </div>
+    </div>
+    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'mail/adminLayout.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    {{ request.user.email|json_script:"user_email" }}
+    {{ request.user.first_name|json_script:"first_name" }}
+    {{ request.user.last_name|json_script:"last_name" }}
+    <script src="{% static 'mail/inbox.js' %}"></script>
+    <script defer src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdn.datatables.net/2.1.4/js/dataTables.js"></script>
+    <script defer src="https://cdn.datatables.net/2.1.4/js/dataTables.bootstrap5.js"></script>
+    <script defer src="{% static 'mail/adminDataTable.js' %}"></script>
 </body>
+
 </html>

@@ -71,7 +71,11 @@
               <div class="input-group-prepend">
                 <span class="input-group-text bg-white border-0" id="type">Courier Type:</span>
               </div>
-              <input id="External-type" class="form-control">
+              <input id="External-type" list="types">
+                <datalist id="types">
+                  <option value="Incoming">
+                  <option value="Outgoing">
+                </datalist>
             </div>
         </div>
 
@@ -80,7 +84,7 @@
                   <div class="input-group-prepend ">
                     <span class="input-group-text bg-white border-0" id="From">From:</span>
                   </div>
-                  <input disabled class="form-control bg-white" value="{{ request.user.department }}">
+                  <input id="External-from" class="form-control bg-white">
                 </div>
           </div>
 

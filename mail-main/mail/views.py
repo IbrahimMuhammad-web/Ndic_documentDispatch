@@ -89,14 +89,16 @@ def compose_external(request):
 
     # Get contents of email
     type = data.get("type", "")
+    exfrom = data.get("from", "")
     recipients = data.get("recipients", "")
     subject = data.get("subject", "")
     through = data.get("through", "")
 
+
     email = ExternalMailsRecord(
             department=request.user.department,
+            sender = exfrom,
             mail_type = type,
-            sender=request.user.department,
             subject=subject,
             mail_through=through,
             recipients=recipients,
@@ -104,7 +106,6 @@ def compose_external(request):
     email.save()
 
     return JsonResponse({"message": "Mail sent successfully."}, status=201)
-
 
 # this function is where that things in the page(mails) are filtered and displayed
 # query all mails based on the user's departments
@@ -121,11 +122,22 @@ def mailbox(request, mailbox):
         emails = Email.objects.filter(
             department=user_department, sender=user_department, deleted=False,
         )
+    elif mailbox == "inCourier":
+        emails = ExternalMailsRecord.objects.filter(
+            department=user_department, recipients=user_department, deleted=False,
+        )
+    elif mailbox == "outCourier":
+        emails = ExternalMailsRecord.objects.filter(
+            department=user_department, sender=user_department, deleted=False,
+        )
     elif mailbox == "trash":
         emails = Email.objects.filter(
             department=user_department, deleted=True
-        ).filter( Q(sender=user_department) |Q(recipients=user_department))
-    
+        ).filter(Q(sender=user_department) | Q(recipients=user_department))
+    elif mailbox == "Exmail_trash":
+        emails = ExternalMailsRecord.objects.filter(
+            department=user_department, deleted=True
+        ).filter(Q(sender=user_department) | Q(recipients=user_department))
     else:
         return JsonResponse({"error": "Invalid mailbox."}, status=400)
 
@@ -141,32 +153,60 @@ def email(request, department_id):
     # Query for requested email
     try:
         email = Email.objects.get(department=request.user.department, pk=department_id)
+        if email:
+        # Return email contents
+            if request.method == "GET":
+                return JsonResponse(email.serialize())
+
+            # Update whether email is read or deleted
+            elif request.method == "PUT":
+                data = json.loads(request.body)
+                if data.get("read") is not None:
+                    email.read = data["read"]
+                if data.get("deleted") is not None:
+                    email.deleted = data["deleted"]
+                email.save()
+                return HttpResponse(status=204)
+
+            elif request.method == "DELETE":
+                email.delete()
+                return HttpResponse(status=204)
+            # Email must be via GET or PUT
+            else:
+                return JsonResponse({
+                    "error": "GET or PUT or DELETE request required."
+                }, status=400)
+        
     except Email.DoesNotExist:
-        return JsonResponse({"error": "Email not found."}, status=404)
+        try:
+            external_email = ExternalMailsRecord.objects.get(department=request.user.department, pk=department_id)
+            if external_email:
+                if request.method == "GET":
+                    return JsonResponse(external_email.serialize())
 
-    # Return email contents
-    if request.method == "GET":
-        return JsonResponse(email.serialize())
+                # Update whether email is read or deleted
+                elif request.method == "PUT":
+                    data = json.loads(request.body)
+                    if data.get("read") is not None:
+                        external_email.read = data["read"]
+                    if data.get("deleted") is not None:
+                        external_email.deleted = data["deleted"]
+                    external_email.save()
+                    return HttpResponse(status=204)
 
-    # Update whether email is read or deleted
-    elif request.method == "PUT":
-        data = json.loads(request.body)
-        if data.get("read") is not None:
-            email.read = data["read"]
-        if data.get("deleted") is not None:
-            email.deleted = data["deleted"]
-        email.save()
-        return HttpResponse(status=204)
+                elif request.method == "DELETE":
+                    external_email.delete()
+                    return HttpResponse(status=204)
+                # Email must be via GET or PUT
+                else:
+                    return JsonResponse({
+                        "error": "GET or PUT or DELETE request required."
+                    }, status=400)
 
-    elif request.method == "DELETE":
-        email.delete()
-        return HttpResponse(status=204)
-    # Email must be via GET or PUT
-    else:
-        return JsonResponse({
-            "error": "GET or PUT or DELETE request required."
-        }, status=400)
+        except ExternalMailsRecord.DoesNotExist:
+            return JsonResponse({"error": "Email not found."}, status=404)
 
+    
 @csrf_exempt
 @login_required
 def search(request, query):

@@ -21,8 +21,7 @@ class Email(models.Model):
     # body = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
-    mail_type = models.CharField(max_length=200, null=False, default="Internal")
-    amount = models.IntegerField(null=True, blank=True)
+    amount = models.BigIntegerField(null=True, blank=True)
     referenceCode = models.CharField(max_length=200, null=True)
     mail_through = models.CharField(max_length=200, null=True, blank=True)    
     deleted = models.BooleanField(default=False,blank=True)
@@ -39,11 +38,16 @@ class Email(models.Model):
             "sender": self.sender.department,
             "recipients": [recipients.department for recipients in self.recipients.all()],
             "subject": self.subject,
+            "amount": self.amount,
+            "referenceCode": self.referenceCode,
             "timestamp": self.timestamp.strftime("%b %d-%Y-%H:%M %p" ),
             "read": self.read,
             "deleted": self.deleted,
 
         }
+
+    def __str__(self):
+        return f"{self.subject}"
 
 class ExternalMailsRecord(models.Model):
     type = (
@@ -59,6 +63,21 @@ class ExternalMailsRecord(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     deleted = models.BooleanField(default=False,blank=True)
     read = models.BooleanField(default=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "username": self.department.department,
+            "sender": self.sender,
+            "recipients": self.recipients,
+            "subject": self.subject,
+            "timestamp": self.timestamp.strftime("%b %d-%Y-%H:%M %p" ),
+            "read": self.read,
+            "deleted": self.deleted,
+
+        }
+
+    
     
     def __str__(self):
         return f"{self.subject}"

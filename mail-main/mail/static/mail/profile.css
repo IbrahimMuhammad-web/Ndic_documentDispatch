@@ -1,0 +1,16 @@
+.user-icon{
+    padding: 6px 11px;
+    font-size: 18px;
+    font-weight: normal;
+}
+.user-icon-large{
+    font-size: 38px;
+    padding: 1rem 1.7rem;
+    margin: 10px 5rem;
+}
+.username{
+    white-space: nowrap;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    margin-top: 1rem;
+}
