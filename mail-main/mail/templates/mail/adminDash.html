@@ -9,7 +9,11 @@
             <h4>Admin Dashboard</h4>
         </div>
         <div class="row">
-            
+            {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{message}}
+                </div>
+            {% endfor %}
             <div class="col-12 col-md-6 d-flex" >
                 <div class="card flex-fill border-0 illustration" style="background: blue; color:white;">
                     <div class="card-body p-0 d-flex flex-fill">
@@ -79,10 +83,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        {% if message %}
-                            <div>{{ message }}</div>
-                        {% endif %}
-                        <form class="row g-3" action="{% url 'admin_dashboard' username=request.user.username %}" method="post">
+                        {% for message in messages %}
+                            <div class="alert alert-info" role="alert">
+                                {{message}}
+                            </div>
+                        {% endfor %}
+                        <form class="row g-3" method="post">
                             {% csrf_token %}
                             <div class="row g-3">
                                 <label for="inputName4" class="form-label">Employee Name <span style="color: red;">*</span></label>

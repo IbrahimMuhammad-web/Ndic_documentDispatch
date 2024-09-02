@@ -55,8 +55,23 @@ def compose(request):
     # Get contents of email
     subject = data.get("subject", "")
     through = data.get("through", "")
-    amount = data.get("amount", "")
+    amountb4 = data.get("amount", "")
     refCode = data.get("refCode", "")
+    
+    if amountb4 == "":
+        amount = ""
+    else:
+        try:
+            amount = int(amountb4)
+            if amount <= 0:
+                return JsonResponse({
+                    "error": "Amount must be a positive integer."
+                }, status=400)
+        except ValueError:
+            return JsonResponse({
+                "error": "Amount must be a valid integer."
+            }, status=400)
+    
     # Create one email for each recipient, plus sender
     users = set()
     users.add(request.user.department)
