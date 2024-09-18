@@ -16,18 +16,18 @@
     <body>
       {% if user.is_authenticated %}
       <div class="overlay"></div>
-        <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-white pl-0">
+        <nav class="navbar navbar-expand-lg fixed-top pl-0" style="background-color: rgb(234, 242, 255);">
           <button type="button" id="sidebarCollapse" class="btn btn-link text-secondary mr-2 rounded-circle">
             <i class="fas fa-bars"></i>
         </button>
             <a class="navbar-brand ml-2" href="#"><img class="gb_ua" src="{% static '/mail/img/dispatch_logo2.PNG' %}" alt="" aria-hidden="true" style="width:109px;height:40px"></a>
             <!-- search bar -->
             <form class="inline-form col-md-9 p-0 srch-form">
-              <div class="input-group srchbar py-1">
+              <div class="input-group srchbar py-1" style="background-color:white;">
                 <div class="input-group-prepend border-0 pl-1">
                   <button id="button-addon4" type="button" class="btn btn-link text-secondary srch_btn"><i class="fa fa-search"></i></button>
                 </div>
-                <input type="search" placeholder="Search mail" aria-describedby="button-addon4" class="form-control bg-transparent border-0 srch-inp" >
+                <input type="search" placeholder="Search mail" aria-describedby="button-addon4" class="form-control border-0 srch-inp">
               </div>
             </form>
 
@@ -60,26 +60,31 @@
                     <img class="sidebar-logo" src="{% static '/mail/img/dispatch_logo2.PNG' %}" alt="" aria-hidden="true" style="width:130px;height:40px">
                     <li class="nav-item">
                       <a class="nav-link mb-3 mr-4 py-2 compose-link" id="compose" style="border-radius:10px; width:100%; height:60px; line-height: 50px; white-space: nowrap; background-color: rgba(130, 166, 244, 0.2);">
-                        <img src="{% static '/mail/img/pencil-solid.svg' %}" class="plus-img mr-2" style="width:20px;"> Compose
+                        <img src="{% static '/mail/img/pencil-solid.svg' %}" class="plus-img mr-2" style="width:20px;"> Dispatch
                       </a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link py-lg-1 active" id="inbox" >
-                        <i class="fas fa-inbox pl-2 pr-3"></i>Inbox
+                        <i class="fas fa-envelope pl-2 pr-3"></i>Incoming mails
                       </a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link py-lg-1 " id="sent">
-                        <i class="fas fa-paper-plane pl-2 pr-3"></i>Sent
+                        <i class="fas fa-paper-plane pl-2 pr-3"></i>Outgoing mails
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link py-lg-1 " id="inCourier">
-                        <i class="fas fa-paper-plane pl-2 pr-3"></i>Incoming Courier
+                      <a class="nav-link py-lg-1 active" id="Received" >
+                        <i class="fas fa-envelope-open pl-2 pr-3"></i>Received mails
                       </a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link py-lg-1 " id="outCourier">
+                      <a class="nav-link py-lg-1 " id="incoming Courier">
+                        <i class="fas fa-inbox pl-2 pr-3"></i>Incoming Courier
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link py-lg-1 " id="outgoing Courier">
                         <i class="fas fa-paper-plane pl-2 pr-3"></i>Outgoing Courier
                       </a>
                     </li>
@@ -90,7 +95,7 @@
                     </li>
                     <li class="nav-item">
                       <a class="nav-link py-lg-1 " id="Exmail_trash">
-                        <i class="fas fa-trash pl-2 pr-3"></i>External Trash
+                        <i class="fas fa-trash pl-2 pr-3"></i>External Mails Trash
                       </a>
                     </li>
                   </ul>

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div id="dashboard">
-<main class="content px-3 py-2">
+<main class="display-block content px-3 py-2">
     <div class="container-fluid">
         <div class="mb-3">
             <h4>Admin Dashboard</h4>
@@ -41,7 +41,7 @@
                                     {{totalUsers}}
                                 </h4>
                                 <p class="mb-2">
-                                    Total Users in {{request.user.department}}
+                                    Total Users
                                 </p>
                                 <!-- <div class="mb-0">
                                     <span class="badge text-success me-2">
@@ -67,7 +67,7 @@
                 <h6 style="margin-bottom: 0;">
                     Add new users
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="background-color:unset; color: black; border:none; margin:0;">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="background-color:unset; color: blue; border:none; margin:0;padding:0px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
                         <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
@@ -118,6 +118,15 @@
                             </div>
                             
                             <div class="col-md-6">
+                                <label for="Department" class="form-label">Department</label>
+                                <select id="inputState"  name="userDepartment" class="form-select" required>
+                                    {% for department in all_department %}
+                                        <option value="{{ department.department }}">{{ department.department }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
                             <label for="userType" class="form-label">User Type</label>
                             <select id="inputState"  name="group" class="form-select" required>
                                 {% for group in groups %}
@@ -145,6 +154,7 @@
                             <th scope="col">First</th>
                             <th scope="col">Last</th>
                             <th scope="col">Username</th>
+                            <th scope="col">Department</th>
                             <th scope="col">Email</th>
                         </tr>
                     </thead>
@@ -154,6 +164,7 @@
                             <td>{{entry.first_name}}</td>
                             <td>{{entry.last_name}}</td>
                             <td>{{entry.username}}</td>
+                            <td>{{entry.department}}</td>
                             <td>{{entry.email}}</td>
                         </tr>
                     </tbody>
@@ -170,7 +181,7 @@
 </a>
 
 <!-- user tables page -->
- <div class="container" id="user-tables">
+ <div class="display-none container" id="user-tables">
     <div class="mb-3">
         <h4>User Table</h4>
     </div>
@@ -658,7 +669,7 @@
 <!-- end of table -->
 
  <!-- internal mails tables page -->
- <div class="container" id="inmails-tables">
+ <div class="display-none container" id="inmails-tables">
     <div class="mb-3">
         <h4>Internal Mails</h4>
     </div>
@@ -1146,7 +1157,7 @@
 <!-- end of table -->
 
 <!-- external mails tables page -->
-<div class="container" id="exmails-tables">
+<div class="display-none container" id="exmails-tables">
     <div class="mb-3">
         <h4>External Mails</h4>
     </div>

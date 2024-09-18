@@ -350,12 +350,45 @@ async function load_mailbox(mailbox, query = "") {
   </div>`;
 
   // Display the mailbox name with the first letter capitalized
-  document.querySelector(
-    "#emails-view"
-  ).innerHTML = `<h4 class="mailbox_head py-2 pl-3 m-0 mx-1">${
-    mailbox.charAt(0).toUpperCase() + mailbox.slice(1)
-  }</h4> ${spinner}`;
+  function mailboxTitle(title) {
+    document.querySelector(
+      "#emails-view"
+    ).innerHTML = `<h4 class="mailbox_head py-2 pl-3 m-0 mx-1">${
+      title
+    }</h4> ${spinner}`;
+  }
 
+  if (mailbox === "inbox") {
+    mailboxTitle("Incoming Mails");
+  }
+
+  else if (mailbox === "sent") {
+    mailboxTitle("Outgoing Mails");
+  }
+
+  else if (mailbox === "Received") {
+    mailboxTitle("Received Mails");
+  }
+  
+  else if (mailbox === "incoming Courier") {
+    mailboxTitle("Incoming Courier");
+  }
+  
+  else if (mailbox === "outgoing Courier") {
+    mailboxTitle("Outgoing Courier");
+  }
+  
+  else if (mailbox === "trash") {
+    mailboxTitle("Internal Mails Recently Deleted");
+  }
+  
+  else if (mailbox === "Exmail_trash") {
+    mailboxTitle("External Mails Recently Deleted");
+  }
+
+  else if (mailbox === "search") {
+    mailboxTitle("Search: "+ query);
+  }
   // console.log(mailbox);
   // check If it's the search mailbox, update the URL endpoint if true
   if (mailbox === "search") {
@@ -367,7 +400,8 @@ async function load_mailbox(mailbox, query = "") {
   // Check if mailbox exists using a HEAD request
   const mailboxExists = await fetch(`/emails/${mailbox}`, { method: 'HEAD' })
   .then(response => response.ok);
-  
+  const ExmailboxExists = await fetch(`/external_emails/${mailbox}`, { method: 'HEAD' })
+  .then(response => response.ok);
   if (mailboxExists) {
       fetch(`/emails/${mailbox}`)
       .then((response) => response.json())
@@ -425,37 +459,186 @@ async function load_mailbox(mailbox, query = "") {
               element.classList.add("light");
               element.classList.remove("unread");
               }
-  
-              let mark_class = email.read ? "fa-envelope-open" : "fa-envelope";
-              let del_class = email.deleted ? "fa-recycle" : "fa-trash";
-              let del_forever = mailbox === "trash" ?`<li class="btn-item del_forever" data-toggle="tooltip" data-placement="bottom" title="Delete forever"><i class="fas fa-trash"></i></li>   ` :"";
-              let ext_btn = mailbox === "trash" ? "ext_btn": "";
-              // mail design layout html code
-              return `
-              ${user_avatar}
-              <div class="sender">${sender}</div>
-              <div class="subject text-left">
-                  <div class="d-inline">${
-                  email.subject.length > 0 ? email.subject : "(no subject)"
-                  }</div>
-              </div>
-              <div class="timestamp ${ext_btn}">
-              <span id="time">${readable_date(email.timestamp)}</span>
-              <ul class="btn-list">
-                  <li class="btn-item mark-read" data-toggle="tooltip" data-placement="bottom" title="${mark_read_stat}"><i class="fas ${mark_class}"></i></li>
-                  <li class="btn-item delete" data-toggle="tooltip" data-placement="bottom" title="${del_stat}"><i class="fas ${del_class}"></i></li>   
-                  ${del_forever}
-              </ul>
-              </div>
-              `;
-          })()}`;
+      
+                let mark_class = email.read ? "fa-envelope-open" : "fa-envelope";
+                let del_class = email.deleted ? "fa-recycle" : "fa-trash";
+                let del_forever = mailbox === "trash" || mailbox === "Exmail_trash" ?`<li class="btn-item del_forever" data-toggle="tooltip" data-placement="bottom" title="Delete forever"><i class="fas fa-trash"></i></li>   ` :"";
+                let ext_btn = mailbox === "trash" || mailbox === "Exmail_trash"? "ext_btn": "";
+                const maxLength = 30; // Adjust this value as needed
+                const subject = email.subject.length > maxLength ? email.subject.slice(0, maxLength) + '...' : email.subject;
+                
+                // mail design layout html code
+                if (mailbox === "inbox" || mailbox === "Received" || mailbox === `search/${query}`) {
+                  const amount = email.amount
+                  const formattedAmount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                  if (!email.read){
+                  return `
+                  ${user_avatar}
+                  <div class="sender">${sender}</div>
+                  <div class="subject text-left">
+                      <div class="d-inline">${
+                      email.subject.length > 0 ? subject.toUpperCase() : "(no subject)"
+                      }</div>
+                  </div>
+                  <div class="timestamp ${ext_btn}">
+                  <span id="time">${readable_date(email.timestamp)}</span>
+                  <ul class="btn-list">
+                      <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                        email.amount.length > 0 ? `₦${formattedAmount}` : ""
+                        }</li>
+                      <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                      email.referenceCode
+                      }</li>
+                      <li class="btn-item mark-read" data-toggle="tooltip" data-placement="bottom" title="${mark_read_stat}"><i class="fas ${mark_class}"></i></li>
+                      <li class="btn-item delete" data-toggle="tooltip" data-placement="bottom" title="${del_stat}"><i class="fas ${del_class}"></i></li>   
+                      ${del_forever}
+                  </ul>
+                  </div>
+                  `;
+                  } else {
+                    return `
+                    ${user_avatar}
+                    <div class="sender">${sender}</div>
+                    <div class="subject text-left">
+                        <div class="d-inline">${
+                        email.subject.length > 0 ? subject.toUpperCase() : "(no subject)"
+                        }</div>
+                    </div>
+                    <div class="timestamp ${ext_btn}">
+                    <span id="time">${readable_date(email.timestamp)}</span>
+                    <ul class="btn-list">
+                        <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                        email.amount.length > 0 ? `₦${formattedAmount}` : ""
+                        }</li>
+                        <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                        email.referenceCode
+                        }</li>
+                        <li class="mark-read"></li>
+                        <li class="delete"></li>
+                        <span id="time">${readable_date(email.timestamp)}</span>
+                    </ul>
+                    </div>
+                    `;
+                    }
+              }
+              else if (mailbox === "sent"){
+                const amount = email.amount
+                const formattedAmount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                if (!email.read){
+                  return `
+                  ${user_avatar}
+                  <div class="sender">${sender}</div>
+                  <div class="subject text-left">
+                      <div class="d-inline">${
+                      email.subject.length > 0 ? subject.toUpperCase() : "(no subject)"
+                      }</div>
+                  </div>
+                  <div class="timestamp ${ext_btn}">
+                  <span id="time">${readable_date(email.timestamp)}</span>
+                  <ul class="btn-list">
+                      <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                      email.amount.length > 0 ? `₦${formattedAmount}` : ""
+                      }</li>
+                      <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                      email.referenceCode
+                      }</li>
+                      <li class="mark-read"></li>
+                      <li class="btn-item delete" data-toggle="tooltip" data-placement="bottom" title="${del_stat}"><i class="fas ${del_class}"></i></li>   
+                      ${del_forever}
+                  </ul>
+                  </div>
+                  `;
+                  } else {
+                    return `
+                    ${user_avatar}
+                    <div class="sender">${sender}</div>
+                    <div class="subject text-left">
+                        <div class="d-inline">${
+                        email.subject.length > 0 ? subject.toUpperCase() : "(no subject)"
+                        }</div>
+                    </div>
+                    <div class="timestamp ${ext_btn}">
+                    <span id="time">${readable_date(email.timestamp)}</span>
+                    <ul class="btn-list">
+                        <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                        email.amount.length > 0 ? `₦${formattedAmount}` : ""
+                        }</li>
+                        <li style="padding-right:20px; class="d-inline" data-placement="bottom">${
+                        email.referenceCode
+                        }</li>
+                        <li class="mark-read"></li>
+                        <li class="delete"></li>
+                        <span id="time">${readable_date(email.timestamp)}</span>
+                    </ul>
+                    </div>
+                    `;
+                    }
+              }
+              else if(mailbox === "incoming Courier" || mailbox === "outgoing Courier"){
+                if (!email.read){
+                return `
+                ${user_avatar}
+                <div class="sender">${sender}</div>
+                <div class="subject text-left">
+                    <div class="d-inline">${
+                    email.subject.length > 0 ? subject.toUpperCase() : "(no subject)"
+                    }</div>
+                </div>
+                <div class="timestamp ${ext_btn}">
+                <span id="time">${readable_date(email.timestamp)}</span>
+                <ul class="btn-list">
+                    <li class="mark-read"></li>
+                    <li class="btn-item delete" data-toggle="tooltip" data-placement="bottom" title="${del_stat}"><i class="fas ${del_class}"></i></li>   
+                    ${del_forever}
+                </ul>
+                </div>
+                `;
+                } else {
+                  return `
+                  ${user_avatar}
+                  <div class="sender">${sender}</div>
+                  <div class="subject text-left">
+                      <div class="d-inline">${
+                      email.subject.length > 0 ? subject.toUpperCase() : "(no subject)"
+                      }</div>
+                  </div>
+                  <div class="timestamp ${ext_btn}">
+                  <span id="time">${readable_date(email.timestamp)}</span>
+                  <ul class="btn-list">
+                    <li class="mark-read"></li>
+                    <li class="delete"></li>
+                    </ul>
+                  </div>
+                  `;
+                  }
+              }
+              else if(mailbox === "trash" || mailbox === "Exmail_trash"){
+                return `
+                  ${user_avatar}
+                  <div class="sender">${sender}</div>
+                  <div class="subject text-left">
+                      <div class="d-inline">${
+                      email.subject.length > 0 ? subject.toUpperCase() : "(no subject)"
+                      }</div>
+                  </div>
+                  <div class="timestamp ${ext_btn}">
+                  <span id="time">${readable_date(email.timestamp)}</span>
+                  <ul class="btn-list">
+                      <li class="mark-read"></li>
+                      <li class="btn-item delete" data-toggle="tooltip" data-placement="bottom" title="${del_stat}"><i class="fas ${del_class}"></i></li>   
+                      ${del_forever}
+                  </ul>
+                  </div>
+                  `;
+              }
+            })()}`;
           element.addEventListener(
               "click",
               (e) => {
               fetch(`/emails/${email.id}`, {
                   method: "PUT",
                   body: JSON.stringify({
-                  read: true,
+                  // read: true,
                   }),
               });
               history.pushState(
@@ -475,7 +658,7 @@ async function load_mailbox(mailbox, query = "") {
   
           mark_read(email, element, mailbox);
           mark_del(email, element, mailbox);
-          if(mailbox === "trash"){
+          if(mailbox === "trash" || mailbox === "Exmail_trash"){
               element.querySelector(".del_forever").addEventListener("click", (e)=>{
               fetch(`/emails/${email.id}`, {
                   method: "DELETE",
@@ -536,7 +719,7 @@ async function load_mailbox(mailbox, query = "") {
       });
   }
 
-  else{
+  else if (ExmailboxExists){
       fetch(`/external_emails/${mailbox}`)
       .then((response) => response.json())
       .then((emails) => {
@@ -596,8 +779,8 @@ async function load_mailbox(mailbox, query = "") {
   
               let mark_class = email.read ? "fa-envelope-open" : "fa-envelope";
               let del_class = email.deleted ? "fa-recycle" : "fa-trash";
-              let del_forever = mailbox === "trash" ?`<li class="btn-item del_forever" data-toggle="tooltip" data-placement="bottom" title="Delete forever"><i class="fas fa-trash"></i></li>   ` :"";
-              let ext_btn = mailbox === "trash" ? "ext_btn": "";
+              let del_forever = mailbox === "trash" || mailbox === "Exmail_trash" ?`<li class="btn-item del_forever" data-toggle="tooltip" data-placement="bottom" title="Delete forever"><i class="fas fa-trash"></i></li>   ` :"";
+              let ext_btn = mailbox === "trash" || mailbox === "Exmail_trash" ? "ext_btn": "";
               // mail design layout html code
               return `
               ${user_avatar}
@@ -623,7 +806,7 @@ async function load_mailbox(mailbox, query = "") {
               fetch(`/external_emails/${email.id}`, {
                   method: "PUT",
                   body: JSON.stringify({
-                  read: true,
+                  // read: true,
                   }),
               });
               history.pushState(
@@ -643,7 +826,7 @@ async function load_mailbox(mailbox, query = "") {
   
           mark_read(email, element, mailbox);
           mark_del(email, element, mailbox);
-          if(mailbox === "trash"){
+          if(mailbox === "trash" || mailbox === "Exmail_trash"){
               element.querySelector(".del_forever").addEventListener("click", (e)=>{
               fetch(`/external_emails/${email.id}`, {
                   method: "DELETE",
@@ -703,6 +886,20 @@ async function load_mailbox(mailbox, query = "") {
           console.log(error);
       });
   }
+
+  else{
+    $(".spin").removeClass("d-flex").addClass("d-none");
+    const empty = document.createElement("div");
+    empty.classList.add(
+        // "row",
+        "d-flex",
+        "flex-column",
+        "mt-5",
+    );
+    empty.innerHTML = `
+    <div class="text-center empty_text">Nothing found</div>`
+    document.querySelector("#emails-view").append(empty);
+}
 }
 
 
@@ -882,12 +1079,12 @@ async function veiw_email(department_id, element, mailbox) {
         document.querySelector("#External-view").style.display = "none";
         let read = element.querySelector(".mark-read > i");
   // console.log(read)
-  if(read.classList.contains("fa-envelope")){
-    read.classList.remove("fa-envelope"),
-      read.classList.add("fa-envelope-open"),
-      $(element.querySelector("#check-email .mark-read"))
-        .attr("data-original-title", "Mark as unread")
-  }
+  // if(read.classList.contains("fa-envelope")){
+  //   read.classList.remove("fa-envelope"),
+  //     read.classList.add("fa-envelope-open"),
+  //     $(element.querySelector("#check-email .mark-read"))
+  //       .attr("data-original-title", "Mark as unread")
+  // }
 
   let sender = email.username;
   let user_avatar = `<div class="sing-icon-wrapper" >
@@ -903,15 +1100,16 @@ async function veiw_email(department_id, element, mailbox) {
     sendto[index] = email.sender;
   }
   // console.log(email.recipients)
-  let btn_list = element.querySelector(".btn-list").innerHTML 
+  // let btn_list = element.querySelector(".btn-list").innerHTML 
   // console.log(btn_list)
+      let mark_read_stat = "Mark as Unread";
+      // Add a class to indicate unread email and update button text
+      if (!email.read){
       document.querySelector("#check-email").innerHTML = `
         <div class="px-md-4 px-sm-0">
          <div class="action_bar bg-white">
            <span class="btn-item back-btn"><i class="fas fa-arrow-left"></i></span>  
-           <ul class="view-mail-btn-list">
-           ${btn_list}
-          </ul>         
+                  
          </div>
         
           <div class="sing-detail">
@@ -964,14 +1162,103 @@ async function veiw_email(department_id, element, mailbox) {
           
           <div class="row mx-auto">
             <h4 class="sing-sub">${
-             subject
+              subject.toUpperCase()
             }</h4>
+          </div>
+
+          <div class="mx-auto">
+            <h5 class="sing-sub">Amount: ${
+             email.amount
+            }</h5>
+            <h5 class="sing-sub">Reference code: ${
+             email.referenceCode
+            }</h5>
+            <br>
+            <br>
+            <button style="width: 25%; height:50px; border-radius:10px; background-color: rgba(130, 166, 244, 0.2); border:0;" class="btn-item read-button mark-read" title="${mark_read_stat}">Receive mail</button>
           </div>
 
           
           
         </div> 
-      `;
+      `
+    }
+    else if (email.read || mailbox === "sent"){
+      document.querySelector("#check-email").innerHTML = `
+        <div class="px-md-4 px-sm-0">
+         <div class="action_bar bg-white">
+           <span class="btn-item back-btn"><i class="fas fa-arrow-left"></i></span>  
+                  
+         </div>
+        
+          <div class="sing-detail">
+          ${user_avatar}
+            <div class="sing-username-wrapper">
+                <div class="sing-username">
+                  <p class="d-inline-block text-truncate p-0 m-0"><strong>${email.sender}</strong> </p>
+                </div>
+            
+                <div class="dropdown">
+                 <a class="dropdown-toggle text-muted h6 text-decoration-none detail-small tome" href="#" id="dropdownMenuButton" data-toggle="dropdown" data-display="static" >to ${sendto}</a>
+                <div class="dropdown-menu dropdown-menu-right dropdown-menu-md-left shadow dropdown-tome" aria-labelledby="dropdownMenu2" style="top: 1rem;">
+                <table class="table table-borderless my-2 detail-small">
+                  <tbody>
+                    <tr class="py-0">
+                      <td class="text-muted text-right">From:</td>
+                      <td><span class="font-weight-bold">${email.sender}</span></td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted text-right">To:</td>
+                      <td>${email.recipients}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted text-right">Date:</td>
+                      <td>${email.timestamp}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted text-right">Subject:</td>
+                      <td>${subject}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted text-right">Amount:</td>
+                      <td>${email.amount}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted text-right">Ref code:</td>
+                      <td>${email.referenceCode}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+ 
+            <div class="sing-timestamp">
+              <p class="detail-small d-inline time">${$(window).width() <= 768 ? readable_date(email.timestamp) : email.timestamp}</p>
+            </div>
+         
+          </div>
+          
+          <div class="row mx-auto">
+            <h4 class="sing-sub">${
+              subject.toUpperCase()
+            }</h4>
+          </div>
+
+          <div class="mx-auto">
+            <h5 class="sing-sub">Amount: ${
+             email.amount
+            }</h5>
+            <h5 class="sing-sub">Reference code: ${
+             email.referenceCode
+            }</h5>
+          </div>
+
+          
+          
+        </div> 
+      `
+    }
       let btn_items = document.querySelectorAll("#check-email .btn-item")
       btn_items.forEach((btn_item) => {
         btn_item.addEventListener("click", () => {
@@ -1047,15 +1334,13 @@ else {
     sendto[index] = email.sender;
   }
   // console.log(email.recipients)
-  let btn_list = element.querySelector(".btn-list").innerHTML 
+  // let btn_list = element.querySelector(".btn-list").innerHTML 
   // console.log(btn_list)
       document.querySelector("#check-email").innerHTML = `
         <div class="px-md-4 px-sm-0">
          <div class="action_bar bg-white">
            <span class="btn-item back-btn"><i class="fas fa-arrow-left"></i></span>  
-           <ul class="view-mail-btn-list">
-           ${btn_list}
-          </ul>         
+               
          </div>
         
           

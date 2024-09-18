@@ -17,7 +17,7 @@ class Email(models.Model):
     department = models.ForeignKey("DepartmentZoneUnit", on_delete=models.SET_NULL, null=True, related_name="emails")
     sender = models.ForeignKey("DepartmentZoneUnit", on_delete=models.CASCADE, null=True, related_name="emails_sent")
     recipients = models.ManyToManyField("DepartmentZoneUnit", related_name="emails_received")
-    subject = models.CharField(max_length=255)
+    subject = models.CharField(max_length=400)
     timestamp = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
     amount = models.CharField(max_length=20, null=True, blank=True)

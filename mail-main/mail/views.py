@@ -12,13 +12,19 @@ from functools import reduce
 import operator
 from django.contrib import messages
 from .models import User, Email, DepartmentZoneUnit, ExternalMailsRecord
+from .decorators import user_only, admin_only
+from django.views.decorators.csrf import csrf_protect
 
 
+@csrf_protect
+@user_only
 def index(request):
 
+    # admin_dashboard context
+    
     # Authenticated users view their inbox
     if request.user.is_authenticated:
-        return render(request, "mail/inbox.html")
+        return render(request, "mail/inbox.html")    
 
     # Everyone else is prompted to sign in
     else:
@@ -71,6 +77,31 @@ def compose(request):
             return JsonResponse({
                 "error": "Amount must be a valid integer."
             }, status=400)
+            
+    if refCode == "":
+        return JsonResponse({
+                "error": "Reference number cannot be empty."
+            }, status=400)
+        
+    
+        
+    
+    all_department = DepartmentZoneUnit.objects.all()
+    
+    department2 = []
+    
+    for dep in all_department:
+        department2.append(dep.department)
+    
+    if through != "":
+        through_c = through.upper().strip()
+        if through_c not in department2:
+            print(department2)
+            return JsonResponse({
+                "error": f"{through_c} does not exist."
+            }, status=400)
+
+            
     
     # Create one email for each recipient, plus sender
     users = set()
@@ -81,7 +112,7 @@ def compose(request):
             department=user,
             sender=request.user.department,
             subject=subject,
-            mail_through=through,
+            mail_through=through_c,
             amount=amount,
             referenceCode=refCode,
             read=user == request.user
@@ -101,7 +132,11 @@ def compose_external(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-   
+    department_list = []
+    all_department = DepartmentZoneUnit.objects.all()
+    for department in all_department:
+        department_list.append(department.department)
+        
     data = json.loads(request.body)
 
     # Get contents of email
@@ -111,7 +146,36 @@ def compose_external(request):
     subject = data.get("subject", "")
     through = data.get("through", "")
 
+    exfrom = exfrom.upper().strip()
+    recipients = recipients.upper().strip()
 
+    print(exfrom)
+    print(recipients)
+    
+    if type == "Incoming":
+        print(department_list)
+        if exfrom in department_list:
+            return JsonResponse({
+                "error": "Incoming External mails cannot be from a department in NDIC!!!"
+            }, status=400)
+        if recipients not in department_list:
+            print(request.user.department)
+            return JsonResponse({
+                "error": "Incoming External mails must be to the user's department!!!"
+            }, status=400)
+            
+    elif type == "Outgoing":
+        print(department_list)
+        if recipients in department_list:
+            return JsonResponse({
+                "error": "Outgoing External mails cannot be sent to a department in NDIC!!!"
+            }, status=400)
+        if exfrom not in department_list:
+            return JsonResponse({
+                "error": "Outgoing External mails must be from the user's department!!!"
+            }, status=400)
+            
+    
     email = ExternalMailsRecord(
             department=request.user.department,
             sender = exfrom,
@@ -133,17 +197,21 @@ def mailbox(request, mailbox):
     user_department = request.user.department.department
     if mailbox == "inbox":
         emails = Email.objects.filter(
-            department=user_department, recipients=user_department, deleted=False,
+            department=user_department, recipients=user_department, deleted=False, read=False
         )
     elif mailbox == "sent":
         emails = Email.objects.filter(
             department=user_department, sender=user_department, deleted=False,
         )
-    elif mailbox == "inCourier":
+    elif mailbox == "Received":
+        emails = Email.objects.filter(
+            department=user_department, recipients=user_department, deleted=False, read=True
+        )
+    elif mailbox == "incoming Courier":
         emails = ExternalMailsRecord.objects.filter(
             department=user_department, mail_type="Incoming", deleted=False,
         )
-    elif mailbox == "outCourier":
+    elif mailbox == "outgoing Courier":
         emails = ExternalMailsRecord.objects.filter(
             department=user_department, mail_type="Outgoing", deleted=False,
         )
@@ -154,7 +222,7 @@ def mailbox(request, mailbox):
     elif mailbox == "Exmail_trash":
         emails = ExternalMailsRecord.objects.filter(
             department=user_department, deleted=True
-        ).filter(Q(sender=user_department) | Q(recipients=user_department))
+        )
     else:
         return JsonResponse({"error": "Invalid mailbox."}, status=400)
 
@@ -229,13 +297,14 @@ def email(request, department_id):
 def search(request, query):
     if " " in query:
         queries = query.split(" ")
-        qset1 =  reduce(operator.__or__, [Q(sender__department__icontains=query) | Q(subject__icontains=query) | Q(body__icontains=query) for query in queries])
+        qset1 =  reduce(operator.__or__, [Q(sender__department__icontains=query) | Q(subject__icontains=query) | Q(amount__icontains=query) | Q(referenceCode__icontains=query) for query in queries])
         results = Email.objects.filter(department=request.user.department).filter(qset1).distinct()
     else:
         results = Email.objects.filter(department=request.user.department)\
             .filter(Q(sender__department__icontains=query) 
             | Q(subject__icontains=query) 
-            | Q(body__icontains=query)).distinct()
+            | Q(amount__icontains=query)
+            | Q(referenceCode__icontains=query)).distinct()
     if results:
         emails = results.order_by("-timestamp").all().distinct()
         return JsonResponse([email.serialize() for email in emails], safe=False)
@@ -243,24 +312,22 @@ def search(request, query):
         return JsonResponse({"error": "No result Found"}, status=404)
     
 @login_required
+@admin_only
 def admin_dashboard(request, username):
-    user = get_object_or_404(User, username=username)
-    
-    user_department = request.user.department.department
-    
+    user = get_object_or_404(User, username=request.user.username)
+
     emailsReceived = Email.objects.filter(
-            department=user_department, recipients=user_department, deleted=False,
+            deleted=False,
         ).count()
     
     emailsSent = Email.objects.filter(
-            department=user_department, sender=user_department, deleted=False,
+        deleted=False,
         ).count()
     
-    totalUsers = User.objects.filter(
-        department=user_department
-    ).count()
-    last_5_users = User.objects.filter(department=user_department).order_by('-date_joined')[:5]
+    totalUsers = User.objects.all().count()
+    last_5_users = User.objects.all().order_by('-date_joined')[:5]
     groups = Group.objects.all()
+    all_department = DepartmentZoneUnit.objects.all()
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
@@ -270,18 +337,24 @@ def admin_dashboard(request, username):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         group = request.POST["group"]
+        department = request.POST["userDepartment"]
         if password != confirmation:
             messages.error(request, "passwords don't match")
-
+        if username == "":
+            messages.error(request, "Username cannot be empty")
         # Attempt to create new user
         try:
-            user = User.objects.create_user(username=username,email=email,password=password,first_name=first_name,last_name=last_name,department=request.user.department)
+            print(all_department)
+            user = User.objects.create_user(username=username,email=email,password=password,first_name=first_name,last_name=last_name,department=department)
             user_group = Group.objects.get(name=group) 
             user_group.user_set.add(user)
             user.save()
         except IntegrityError as e:
             print(e)
             messages.error(request, "Email address already taken.")
+            return JsonResponse({
+                "error": "Email address already taken."
+            }, status=400)
         # login(request, user)
         # return redirect(f"admin_dashboard_{request.user.username}")
     context = {
@@ -290,14 +363,27 @@ def admin_dashboard(request, username):
         'emailsSent': emailsSent,
         'totalUsers' : totalUsers,
         'last_5_users' : last_5_users,
-        'groups': groups
+        'groups': groups,
+        'all_department': all_department,
     }
+    
     return render(request, 'mail/adminDash.html', context)
 
 
+# def userGroup_exists(request):
+#     if request.user.is_authenticated():
+#         user_group = request.user.groups
+#         group_available = Group.objects.filter(name=user_group).count()
+#         if group_available != 0:
+#             if user_group == "admin":
+#                 return HttpResponseRedirect(reverse(f"admin_dashboard_{request.user.username}"))
+#             elif user_group == "user":
+#                 return HttpResponseRedirect(reverse("index"))
+#         else:
+#             return HttpResponseRedirect(reverse("index"))
 
 def login_view(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated:    
         return HttpResponseRedirect(reverse("index"))
     if request.method == "POST":
 
@@ -306,10 +392,14 @@ def login_view(request):
         password = request.POST["password"]
         user = authenticate(request, username=email, password=password)
 
+        # admin_dashboard context
+        
+
         # Check if authentication was successful
         if user is not None:
-            login(request, user)
+            login(request, user)    
             return HttpResponseRedirect(reverse("index"))
+        
         else:
             return render(request, "mail/login.html", {
                 "message": "Invalid email and/or password."
