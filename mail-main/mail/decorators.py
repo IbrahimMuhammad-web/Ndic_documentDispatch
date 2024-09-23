@@ -62,6 +62,7 @@ def user_only(view_func):
                     user_group = Group.objects.get(name=group) 
                     user_group.user_set.add(user)
                     user.save()
+                    messages.success(request, "User added successfully")
                 except IntegrityError as e:
                     print(e)
                     messages.error(request, "Email address already taken.")

@@ -27,6 +27,9 @@
 
 <body>
     {% if user.is_authenticated %}
+    <a href="#" class="theme-toggle">
+    </a>
+    
     <div class="wrapper">
         <aside id="sidebar" class="js-sidebar">
             <!-- Content For Sidebar -->
@@ -42,33 +45,33 @@
 
                     </li>
                     <li class="sidebar-item">
-                        <a id="admin-dashboard"  class="sidebar-link">
+                        <a id="admin-dashboard" href="{% url 'admin_dashboard' username=request.user.username %}" class="sidebar-link" style="color:black;">
                             <i class="fa-solid fa-list pe-2"></i>
                             Dashboard
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a id="user-table"  class="sidebar-link ">
+                        <a id="user-table" href="{% url 'admin_userPage' username=request.user.username %}" class="sidebar-link " style="color:black;">
                             <i class="fa-solid fa-list pe-2"></i>
                             Users
                         </a>
                     </li>
-                    <li class="sidebar-item">
+                    <li class="sidebar-link">
                         <a href="#" class="sidebar-link collapsed" data-bs-target="#mails" data-bs-toggle="collapse"
-                            aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
+                            aria-expanded="false" style="color:black;"><i class="fa-solid fa-file-lines pe-2"></i>
                             Mails
                         </a>
                         <ul id="mails" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                             <li class="sidebar-item">
-                                <a id="internal-mails" class="sidebar-link nav-link">Internal</a>
+                                <a id="internal-mails" href="{% url 'admin_intmailsPage' username=request.user.username %}" class="sidebar-link nav-link" style="color:black">Internal</a>
                             </li>
                             <li class="sidebar-item">
-                                <a id="external-mails" class="sidebar-link nav-link">External</a>
+                                <a id="external-mails" href="{% url 'admin_ExmailsPage' username=request.user.username %}" class="sidebar-link nav-link" style="color:black">External</a>
                             </li>
                         </ul>
                     </li>
 
-                    <li class="sidebar-item">
+                    {% comment %} <li class="sidebar-link">
                         <a href="#" class="sidebar-link collapsed" data-bs-target="#reports" data-bs-toggle="collapse"
                             aria-expanded="false"><i class="fa-solid fa-file-lines pe-2"></i>
                             Reports
@@ -81,13 +84,7 @@
                                 <a id="external-reports" class="sidebar-link">External</a>
                             </li>
                         </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a id="trash" class="sidebar-link">
-                            <i class="fa-solid fa-list pe-2"></i>
-                            Recently Deleted
-                        </a>
-                    </li>
+                    </li> {% endcomment %}
                 
                 </ul>
             </div>

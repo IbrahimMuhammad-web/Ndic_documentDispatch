@@ -55,7 +55,7 @@ def compose(request):
             recipients.append(department)
         except DepartmentZoneUnit.DoesNotExist:
             return JsonResponse({
-                "error": f"Department {department} does not exist."  #change to department {email} does not exist
+                "error": f"Department {department} does not exist."  
             }, status=400)
 
     # Get contents of email
@@ -211,6 +211,12 @@ def compose_external(request):
             "error": "Recipient cannot be empty."
         }, status=400)
         
+    if through == "":
+        return JsonResponse({
+            "error": "Through cannot be empty."
+        }, status=400)
+        
+        
     if subject == "":
         return JsonResponse({
             "error": "Subject cannot be empty."
@@ -357,9 +363,9 @@ def admin_dashboard(request, username):
     user = get_object_or_404(User, username=request.user.username)
 
     emailsReceived = Email.objects.filter(
-            deleted=False,
-        ).count()
-    
+                    deleted=False,
+                ).count()
+            
     emailsSent = Email.objects.filter(
         deleted=False,
         ).count()
@@ -385,16 +391,20 @@ def admin_dashboard(request, username):
         # Attempt to create new user
         try:
             print(all_department)
-            user = User.objects.create_user(username=username,email=email,password=password,first_name=first_name,last_name=last_name,department=department)
+            department_object = DepartmentZoneUnit.objects.get(department=department)
+            user = User.objects.create_user(username=username,email=email,password=password,first_name=first_name,last_name=last_name,department=department_object)
             user_group = Group.objects.get(name=group) 
             user_group.user_set.add(user)
             user.save()
+            messages.success(request, "User added successfully")
         except IntegrityError as e:
             print(e)
             messages.error(request, "Email address already taken.")
             return JsonResponse({
                 "error": "Email address already taken."
             }, status=400)
+        
+
         # login(request, user)
         # return redirect(f"admin_dashboard_{request.user.username}")
     context = {
@@ -406,7 +416,6 @@ def admin_dashboard(request, username):
         'groups': groups,
         'all_department': all_department,
     }
-    
     return render(request, 'mail/adminDash.html', context)
 
 
@@ -421,6 +430,46 @@ def admin_dashboard(request, username):
 #                 return HttpResponseRedirect(reverse("index"))
 #         else:
 #             return HttpResponseRedirect(reverse("index"))
+
+@login_required
+@admin_only
+def admin_userPage(request, username):
+    user = get_object_or_404(User, username=request.user.username)
+
+    all_users = User.objects.all()
+    
+    context = {
+        'user': user,
+        'all_users': all_users
+        }    
+    return render(request, 'mail/admin_userPage.html', context)
+
+@login_required
+@admin_only
+def admin_intmailsPage(request, username):
+    user = get_object_or_404(User, username=request.user.username)
+
+    all_intMails = Email.objects.all()
+    
+    context = {
+        'user': user,
+        'all_intMails': all_intMails
+        }    
+    return render(request, 'mail/admin_internalMails.html', context)
+
+@login_required
+@admin_only
+def admin_ExmailsPage(request, username):
+    user = get_object_or_404(User, username=request.user.username)
+
+    all_exMails = ExternalMailsRecord.objects.all()
+    
+    context = {
+        'user': user,
+        'all_exMails': all_exMails
+        }    
+    return render(request, 'mail/admin_externalMails.html', context)
+
 
 def login_view(request):
     if request.user.is_authenticated:    

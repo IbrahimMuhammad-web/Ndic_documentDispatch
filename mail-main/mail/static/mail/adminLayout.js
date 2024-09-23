@@ -10,7 +10,7 @@ document.querySelector(".theme-toggle").addEventListener("click",() => {
 
 function toggleRootClass(){
     const current = document.documentElement.getAttribute('data-bs-theme');
-    const inverted = current == 'dark' ? 'light' : 'dark';
+    const inverted = current == 'light'
     document.documentElement.setAttribute('data-bs-theme',inverted);
 }
 
@@ -30,62 +30,3 @@ if(isLight()){
     toggleRootClass();
 }
 
-document.querySelector("dashboard").style.display === "block"
-document.querySelector("user-tables").style.display === "none"
-document.querySelector("inmails-tables").style.display === "none"
-document.querySelector("exmails-tables").style.display === "none"
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    document.querySelector("#admin-dashboard").addEventListener("click", () => {
-      if(document.querySelector("#dashboard").style.display === "none"){
-        admin_dashboard()
-      }
-    });
-    document.querySelector("#user-table").addEventListener("click", () => {
-      if(document.querySelector("#user-tables").style.display === "none"){
-        user_table()
-      }
-    });
-    document.querySelector("#internal-mails").addEventListener("click", () => {
-      if(document.querySelector("#inmails-table").style.display === "none"){
-        internal_mails()
-      }
-    });
-    document.querySelector("#external-mails").addEventListener("click", () => {
-      if(document.querySelector("exmails-tables").style.display === "none"){
-        external_mails()
-      }
-    });
-    // history.pushState({compose : }, "", `./#${link.id}`)
-    // By default, load the inbox
-    load_mailbox("inbox");
-  });
-
-function admin_dashboard(){
-      document.querySelector("dashboard").style.display === "block"
-      document.querySelector("user-tables").style.display === "none"
-      document.querySelector("inmails-tables").style.display === "none"
-      document.querySelector("exmails-tables").style.display === "none"
-    }
-    
-    function user_table(){
-      document.querySelector("dashboard").style.display === "none"
-      document.querySelector("user-tables").style.display === "block"
-      document.querySelector("inmails-tables").style.display === "none"
-      document.querySelector("exmails-tables").style.display === "none"
-    }
-    
-    function internal_mails(){
-      document.querySelector("dashboard").style.display === "none"
-      document.querySelector("user-tables").style.display === "none"
-      document.querySelector("inmails-tables").style.display === "block"
-      document.querySelector("exmails-tables").style.display === "none"
-    }
-    
-    function external_mails(){
-      document.querySelector("dashboard").style.display === "none"
-      document.querySelector("user-tables").style.display === "none"
-      document.querySelector("inmails-tables").style.display === "none"
-      document.querySelector("exmails-tables").style.display === "block"
-    }

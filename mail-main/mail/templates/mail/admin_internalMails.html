@@ -1,0 +1,52 @@
+{% extends "mail/adminLayout.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- internal mails tables page -->
+<div class="display-none container" id="inmails-tables">
+    <br>
+    <div class="mb-3">
+        <h4>Internal Mails</h4>
+    </div>
+    <table id="example2" class="table table-striped" style="width:100%">
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>Through</th>
+                <th>To</th>
+                <th>Subject</th>
+                <th>Timestamp</th>
+                <th>Amount</th>
+                <th>Reference code</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mail in all_intMails %}
+            <tr>
+                <td>{{ mail.sender }}</td>
+                <td>{{ mail.mail_through }}</td>
+                <td>{{ mail.recipients.all|join:", " }}</td>
+                <td>{{ mail.subject }}</td>
+                <td>{{ mail.timestamp }}</td>
+                <td>{{ mail.amount }}</td>
+                <td>{{ mail.referenceCode }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>From</th>
+                <th>Through</th>
+                <th>To</th>
+                <th>Subject</th>
+                <th>Timestamp</th>
+                <th>Amount</th>
+                <th>Reference code</th>
+            </tr>
+        </tfoot>
+    </table>
+ </div>
+<!-- end of table -->
+
+{% endblock %}
