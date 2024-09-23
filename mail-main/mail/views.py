@@ -151,30 +151,70 @@ def compose_external(request):
 
     print(exfrom)
     print(recipients)
+    if type != "":
+        if type == "Incoming":
+            print(department_list)
+            if exfrom != "":
+                if exfrom in department_list:
+                    return JsonResponse({
+                        "error": "Incoming External mails cannot be from a department in NDIC!!!"
+                    }, status=400)
+            else:
+                return JsonResponse({
+                    "error": "Sender cannot be empty."
+                }, status=400)
+            
+            if recipients != "":
+                if recipients not in department_list:
+                    print(request.user.department)
+                    return JsonResponse({
+                        "error": "Incoming External mails must be to the user's department!!!"
+                    }, status=400)
+            else:
+                return JsonResponse({
+                    "error": "Recipient cannot be empty."
+                }, status=400)
+                
+        elif type == "Outgoing":
+            print(department_list)
+            if recipients != "":
+                if recipients in department_list:
+                    return JsonResponse({
+                        "error": "Outgoing External mails cannot be sent to a department in NDIC!!!"
+                    }, status=400)
+            else:
+                return JsonResponse({
+                    "error": "Recipient cannot be empty."
+                }, status=400)
+                
+            if exfrom != "":
+                if exfrom not in department_list:
+                    return JsonResponse({
+                        "error": "Outgoing External mails must be from the user's department!!!"
+                    }, status=400)
+            else:
+                return JsonResponse({
+                    "error": "Sender cannot be empty."
+                }, status=400)
+    else:
+        return JsonResponse({
+            "error": "Type of mail (Incoming or Outgoing) is required."
+        }, status=400)
     
-    if type == "Incoming":
-        print(department_list)
-        if exfrom in department_list:
-            return JsonResponse({
-                "error": "Incoming External mails cannot be from a department in NDIC!!!"
-            }, status=400)
-        if recipients not in department_list:
-            print(request.user.department)
-            return JsonResponse({
-                "error": "Incoming External mails must be to the user's department!!!"
-            }, status=400)
-            
-    elif type == "Outgoing":
-        print(department_list)
-        if recipients in department_list:
-            return JsonResponse({
-                "error": "Outgoing External mails cannot be sent to a department in NDIC!!!"
-            }, status=400)
-        if exfrom not in department_list:
-            return JsonResponse({
-                "error": "Outgoing External mails must be from the user's department!!!"
-            }, status=400)
-            
+    if exfrom == "":
+        return JsonResponse({
+            "error": "Sender cannot be empty."
+        }, status=400)
+    
+    if recipients == "":
+        return JsonResponse({
+            "error": "Recipient cannot be empty."
+        }, status=400)
+        
+    if subject == "":
+        return JsonResponse({
+            "error": "Subject cannot be empty."
+        }, status=400)
     
     email = ExternalMailsRecord(
             department=request.user.department,
