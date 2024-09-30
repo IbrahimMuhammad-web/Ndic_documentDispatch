@@ -100,7 +100,8 @@ def compose(request):
             return JsonResponse({
                 "error": f"{through_c} does not exist."
             }, status=400)
-
+    else:
+        through_c = None
             
     
     # Create one email for each recipient, plus sender
