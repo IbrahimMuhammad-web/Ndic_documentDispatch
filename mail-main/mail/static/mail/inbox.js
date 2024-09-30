@@ -1105,85 +1105,164 @@ async function veiw_email(department_id, element, mailbox) {
       let mark_read_stat = "Mark as Unread";
       // Add a class to indicate unread email and update button text
       if (!email.read){
-      document.querySelector("#check-email").innerHTML = `
-        <div class="px-md-4 px-sm-0">
-         <div class="action_bar bg-white">
-           <span class="btn-item back-btn"><i class="fas fa-arrow-left"></i></span>  
-                  
-         </div>
-        
-          <div class="sing-detail">
-          ${user_avatar}
-            <div class="sing-username-wrapper">
-                <div class="sing-username">
-                  <p class="d-inline-block text-truncate p-0 m-0"><strong>${email.sender}</strong> </p>
-                </div>
-            
-                <div class="dropdown">
-                 <a class="dropdown-toggle text-muted h6 text-decoration-none detail-small tome" href="#" id="dropdownMenuButton" data-toggle="dropdown" data-display="static" >to ${sendto}</a>
-                <div class="dropdown-menu dropdown-menu-right dropdown-menu-md-left shadow dropdown-tome" aria-labelledby="dropdownMenu2" style="top: 1rem;">
-                <table class="table table-borderless my-2 detail-small">
-                  <tbody>
-                    <tr class="py-0">
-                      <td class="text-muted text-right">From:</td>
-                      <td><span class="font-weight-bold">${email.sender}</span></td>
-                    </tr>
-                    <tr>
-                      <td class="text-muted text-right">To:</td>
-                      <td>${email.recipients}</td>
-                    </tr>
-                    <tr>
-                      <td class="text-muted text-right">Date:</td>
-                      <td>${email.timestamp}</td>
-                    </tr>
-                    <tr>
-                      <td class="text-muted text-right">Subject:</td>
-                      <td>${subject}</td>
-                    </tr>
-                    <tr>
-                      <td class="text-muted text-right">Amount:</td>
-                      <td>${email.amount}</td>
-                    </tr>
-                    <tr>
-                      <td class="text-muted text-right">Ref code:</td>
-                      <td>${email.referenceCode}</td>
-                    </tr>
-                  </tbody>
-                </table>
+        if (mailbox === "sent" || mailbox === "incoming Courier" || mailbox === "outgoing Courier"){
+          document.querySelector("#check-email").innerHTML = `
+          <div class="px-md-4 px-sm-0">
+           <div class="action_bar bg-white">
+             <span class="btn-item back-btn"><i class="fas fa-arrow-left"></i></span>  
+                    
+           </div>
+          
+            <div class="sing-detail">
+            ${user_avatar}
+              <div class="sing-username-wrapper">
+                  <div class="sing-username">
+                    <p class="d-inline-block text-truncate p-0 m-0"><strong>${email.sender}</strong> </p>
+                  </div>
+              
+                  <div class="dropdown">
+                   <a class="dropdown-toggle text-muted h6 text-decoration-none detail-small tome" href="#" id="dropdownMenuButton" data-toggle="dropdown" data-display="static" >to ${sendto}</a>
+                  <div class="dropdown-menu dropdown-menu-right dropdown-menu-md-left shadow dropdown-tome" aria-labelledby="dropdownMenu2" style="top: 1rem;">
+                  <table class="table table-borderless my-2 detail-small">
+                    <tbody>
+                      <tr class="py-0">
+                        <td class="text-muted text-right">From:</td>
+                        <td><span class="font-weight-bold">${email.sender}</span></td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">To:</td>
+                        <td>${email.recipients}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Date:</td>
+                        <td>${email.timestamp}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Subject:</td>
+                        <td>${subject}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Amount:</td>
+                        <td>${email.amount}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Ref code:</td>
+                        <td>${email.referenceCode}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </div>
                 </div>
               </div>
+   
+              <div class="sing-timestamp">
+                <p class="detail-small d-inline time">${$(window).width() <= 768 ? readable_date(email.timestamp) : email.timestamp}</p>
+              </div>
+           
             </div>
- 
-            <div class="sing-timestamp">
-              <p class="detail-small d-inline time">${$(window).width() <= 768 ? readable_date(email.timestamp) : email.timestamp}</p>
+            
+            <div class="row mx-auto">
+              <h4 class="sing-sub">${
+                subject.toUpperCase()
+              }</h4>
             </div>
-         
+  
+            <div class="mx-auto">
+              <h5 class="sing-sub">Amount: ${
+               email.amount
+              }</h5>
+              <h5 class="sing-sub">Reference code: ${
+               email.referenceCode
+              }</h5>
+            </div>
+  
+            
+            
+          </div> 
+        `
+        }
+        else {
+        document.querySelector("#check-email").innerHTML = `
+          <div class="px-md-4 px-sm-0">
+          <div class="action_bar bg-white">
+            <span class="btn-item back-btn"><i class="fas fa-arrow-left"></i></span>  
+                    
           </div>
           
-          <div class="row mx-auto">
-            <h4 class="sing-sub">${
-              subject.toUpperCase()
-            }</h4>
-          </div>
+            <div class="sing-detail">
+            ${user_avatar}
+              <div class="sing-username-wrapper">
+                  <div class="sing-username">
+                    <p class="d-inline-block text-truncate p-0 m-0"><strong>${email.sender}</strong> </p>
+                  </div>
+              
+                  <div class="dropdown">
+                  <a class="dropdown-toggle text-muted h6 text-decoration-none detail-small tome" href="#" id="dropdownMenuButton" data-toggle="dropdown" data-display="static" >to ${sendto}</a>
+                  <div class="dropdown-menu dropdown-menu-right dropdown-menu-md-left shadow dropdown-tome" aria-labelledby="dropdownMenu2" style="top: 1rem;">
+                  <table class="table table-borderless my-2 detail-small">
+                    <tbody>
+                      <tr class="py-0">
+                        <td class="text-muted text-right">From:</td>
+                        <td><span class="font-weight-bold">${email.sender}</span></td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">To:</td>
+                        <td>${email.recipients}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Date:</td>
+                        <td>${email.timestamp}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Subject:</td>
+                        <td>${subject}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Amount:</td>
+                        <td>${email.amount}</td>
+                      </tr>
+                      <tr>
+                        <td class="text-muted text-right">Ref code:</td>
+                        <td>${email.referenceCode}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="sing-timestamp">
+                <p class="detail-small d-inline time">${$(window).width() <= 768 ? readable_date(email.timestamp) : email.timestamp}</p>
+              </div>
+          
+            </div>
+            
+            <div class="row mx-auto">
+              <h4 class="sing-sub">${
+                subject.toUpperCase()
+              }</h4>
+            </div>
 
-          <div class="mx-auto">
-            <h5 class="sing-sub">Amount: ${
-             email.amount
-            }</h5>
-            <h5 class="sing-sub">Reference code: ${
-             email.referenceCode
-            }</h5>
-            <br>
-            <br>
-            <button style="width: 25%; height:50px; border-radius:10px; background-color: rgba(130, 166, 244, 0.2); border:0;" class="btn-item read-button mark-read" title="${mark_read_stat}">Receive mail</button>
-          </div>
+            <div class="mx-auto">
+              <h5 class="sing-sub">Amount: ${
+              email.amount
+              }</h5>
+              <h5 class="sing-sub">Reference code: ${
+              email.referenceCode
+              }</h5>
+              <br>
+              <br>
+              <button style="width: 25%; height:50px; border-radius:10px; background-color: rgba(130, 166, 244, 0.2); border:0;" class="btn-item read-button mark-read" title="${mark_read_stat}">Receive mail</button>
+            </div>
 
-          
-          
-        </div> 
-      `
+            
+            
+          </div> 
+        `
+      }
+      
     }
-    else if (email.read || mailbox === "sent"){
+    else if (email.read){
       document.querySelector("#check-email").innerHTML = `
         <div class="px-md-4 px-sm-0">
          <div class="action_bar bg-white">

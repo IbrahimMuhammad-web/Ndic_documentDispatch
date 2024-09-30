@@ -22,9 +22,14 @@ def index(request):
 
     # admin_dashboard context
     
+    all_departments = DepartmentZoneUnit.objects.all()
+    context={
+        "all_departments": all_departments
+    }
+    
     # Authenticated users view their inbox
     if request.user.is_authenticated:
-        return render(request, "mail/inbox.html")    
+        return render(request, "mail/inbox.html", context)    
 
     # Everyone else is prompted to sign in
     else:
@@ -39,24 +44,30 @@ def compose(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    # Check recipient emails
     data = json.loads(request.body)
-    departments = [department.strip().upper() for department in data.get("recipients").split(",")]
-    if departments == [""]:
-        return JsonResponse({
-            "error": "At least one recipient required."
-        }, status=400)
+
+
+    # Check recipient emails: For multiple recipients
+    
+    # departments = [department.strip().upper() for department in data.get("recipients").split(",")]
+    # if departments == [""]:
+    #     return JsonResponse({
+    #         "error": "At least one recipient required."
+    #     }, status=400)
 
     # convert many departments to a list of department
-    recipients = []
-    for department in departments:
-        try:
-            department = DepartmentZoneUnit.objects.get(department=department)
-            recipients.append(department)
-        except DepartmentZoneUnit.DoesNotExist:
-            return JsonResponse({
-                "error": f"Department {department} does not exist."  
-            }, status=400)
+    # recipients = []
+    # for department in departments:
+    #     try:
+    #         department = DepartmentZoneUnit.objects.get(department=department)
+    #         recipients.append(department)
+    #     except DepartmentZoneUnit.DoesNotExist:
+    #         return JsonResponse({
+    #             "error": f"Department {department} does not exist."  
+    #         }, status=400)
+
+    # variant: single recipient which makes it easier to handle
+    recipient = data.get("recipients","")
 
     # Get contents of email
     subject = data.get("subject", "")
@@ -103,25 +114,38 @@ def compose(request):
     else:
         through_c = None
             
+    if recipient != "":
+        recipient = recipient.upper().strip()
+        if recipient not in department2:
+            print(department2)
+            return JsonResponse({
+                "error": f"{recipient} does not exist."
+            }, status=400)
+    else:
+        return JsonResponse({
+            "error": "Recipient cannot be empty."
+        })
+            
     
-    # Create one email for each recipient, plus sender
-    users = set()
-    users.add(request.user.department)
-    users.update(recipients)
-    for user in users:
-        email = Email(
-            department=user,
-            sender=request.user.department,
-            subject=subject,
-            mail_through=through_c,
-            amount=amount,
-            referenceCode=refCode,
-            read=user == request.user
-        )
-        email.save()
-        for recipient in recipients:
-            email.recipients.add(recipient)
-        email.save()
+
+    
+    email = Email(
+        department=request.user.department,
+        sender=request.user.department,
+        subject=subject,
+        mail_through=through_c,
+        amount=amount,
+        referenceCode=refCode,
+        read=recipient == request.user
+    )
+    email.save()
+    
+    email.recipients.add(recipient)
+    email.save()
+        # FOR MULTIPLE RECIPIENTS
+        # for recipient in recipients:
+        #     email.recipients.add(recipient)
+        # email.save()
 
     return JsonResponse({"message": "Mail sent successfully."}, status=201)
 
@@ -244,7 +268,7 @@ def mailbox(request, mailbox):
     user_department = request.user.department.department
     if mailbox == "inbox":
         emails = Email.objects.filter(
-            department=user_department, recipients=user_department, deleted=False, read=False
+            recipients=user_department, deleted=False, read=False
         )
     elif mailbox == "sent":
         emails = Email.objects.filter(
@@ -252,7 +276,7 @@ def mailbox(request, mailbox):
         )
     elif mailbox == "Received":
         emails = Email.objects.filter(
-            department=user_department, recipients=user_department, deleted=False, read=True
+            recipients=user_department, deleted=False, read=True
         )
     elif mailbox == "incoming Courier":
         emails = ExternalMailsRecord.objects.filter(
@@ -262,9 +286,10 @@ def mailbox(request, mailbox):
         emails = ExternalMailsRecord.objects.filter(
             department=user_department, mail_type="Outgoing", deleted=False,
         )
+        # this or this for trash
     elif mailbox == "trash":
         emails = Email.objects.filter(
-            department=user_department, deleted=True
+            deleted=True
         ).filter(Q(sender=user_department) | Q(recipients=user_department))
     elif mailbox == "Exmail_trash":
         emails = ExternalMailsRecord.objects.filter(
@@ -284,7 +309,7 @@ def email(request, department_id):
 
     # Query for requested email
     try:
-        email = Email.objects.get(department=request.user.department, pk=department_id)
+        email = Email.objects.get(pk=department_id)
         if email:
         # Return email contents
             if request.method == "GET":

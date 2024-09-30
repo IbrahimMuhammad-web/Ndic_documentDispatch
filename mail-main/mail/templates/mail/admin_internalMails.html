@@ -15,6 +15,7 @@
                 <th>From</th>
                 <th>Through</th>
                 <th>To</th>
+                <th>Department</th>
                 <th>Subject</th>
                 <th>Timestamp</th>
                 <th>Amount</th>
@@ -27,6 +28,7 @@
                 <td>{{ mail.sender }}</td>
                 <td>{{ mail.mail_through }}</td>
                 <td>{{ mail.recipients.all|join:", " }}</td>
+                <td>{{ mail.department }}</td>
                 <td>{{ mail.subject }}</td>
                 <td>{{ mail.timestamp }}</td>
                 <td>{{ mail.amount }}</td>
